@@ -1,0 +1,16 @@
+﻿<Window x:Class="FiasView.Forms.formFindOneAdress"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FiasView.Forms"
+        mc:Ignorable="d"
+        Title="formFindOneAdress" Height="214.513" Width="445.339" WindowStyle="None" WindowState="Normal" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <DataGrid Height="110" VerticalAlignment="Bottom"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="10,33,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Полный адрес" HorizontalAlignment="Left" Margin="5,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="X" Name="_formCloseAdress" MouseLeftButtonUp="_formCloseAdress_MouseLeftButtonUp" FontSize="15" Margin="412,0,6,177"/>
+
+    </Grid>
+</Window>

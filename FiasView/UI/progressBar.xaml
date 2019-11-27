@@ -1,0 +1,14 @@
+﻿<Window x:Name="_winPrograssBar" x:Class="FiasView.UI.progressBar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FiasView.UI"
+        mc:Ignorable="d"
+        Title="progressBar" Height="81.039" Width="462.5" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <ProgressBar Value="{Binding ProgBarLoadDB}" Name="_progbar" HorizontalAlignment="Left" Height="20" Margin="10,28,0,0" VerticalAlignment="Top" Width="434"/>
+        <TextBlock  Name="_progressText" Margin="14,30,13,0" TextWrapping="Wrap" Text="{Binding ProgBarTextDB}" Height="16" VerticalAlignment="Top" TextAlignment="Center"/>
+
+    </Grid>
+</Window>
