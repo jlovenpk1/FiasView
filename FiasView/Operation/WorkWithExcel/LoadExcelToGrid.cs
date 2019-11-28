@@ -151,14 +151,14 @@ namespace FiasView.Operation.WorkWithExcel
 
                     for (int x = 0; x < street.Count; x++)
                     {
-                        if (_pAdress[i].StartsWith(street[x]) || _pAdress[i].IndexOf("/") > 0)
+                        if (_pAdress[i].StartsWith(street[x]) || _pAdress[i].IndexOf("/") > 9)
                         {
                             //test += _pAdress[i].Replace(street[x], "");
                             _street = _pAdress[i].Replace(street[x], "");
                             var posStart = _street.IndexOf(" ");
                             _street = posStart < 0 ? _street : _street.Remove(posStart, 1);
                             var posLast = _street.LastIndexOf(" ");
-                            _street = posLast < 0 ? _street : _street.Remove(posLast, 1);
+                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 ? _street : _street.Remove(posLast, 1);
                             if (_street.IndexOf("/") > 0)
                             {
                                 _street = _street.IndexOf("/") > 0 ? _street.Remove(_street.IndexOf("/"), _street.Length - _street.IndexOf("/")) : _street;
@@ -169,14 +169,14 @@ namespace FiasView.Operation.WorkWithExcel
                             }
                             break;
                         }
-                        else if (_pAdress[i].EndsWith(street[x]) || _pAdress[i].IndexOf("/") > 0)
+                        else if (_pAdress[i].EndsWith(street[x]) || _pAdress[i].IndexOf("/") > 9)
                         {
                             //test += _pAdress[i].Replace(street[x], "");
                             _street = _pAdress[i].Replace(street[x], "");
                             var posStart = _street.IndexOf(" ");
                             _street = posStart < 0 ? _street : _street.Remove(posStart, 1);
                             var posLast = _street.LastIndexOf(" ");
-                            _street = posLast < 0 ? _street :_street.Remove(posLast, 1);
+                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 ? _street :_street.Remove(posLast, 1);
                             if (_street.IndexOf("/") > 0)
                             {
                                 _street = _street.IndexOf("/") > 0 ? _street.Remove(_street.IndexOf("/"), _street.Length - _street.IndexOf("/")) : _street;
