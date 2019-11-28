@@ -7,8 +7,9 @@
         mc:Ignorable="d"
         Title="progressBar" Height="81.039" Width="462.5" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen">
     <Grid>
-        <ProgressBar Value="{Binding ProgBarLoadDB}" Name="_progbar" HorizontalAlignment="Left" Height="20" Margin="10,28,0,0" VerticalAlignment="Top" Width="434"/>
+        <ProgressBar Value="{Binding ProgBarLoadDB}" Name="_progbar" Maximum="{Binding ProgBarMaxValue}" HorizontalAlignment="Left" Height="20" Margin="10,28,0,0" VerticalAlignment="Top" Width="434"/>
         <TextBlock  Name="_progressText" Margin="14,30,13,0" TextWrapping="Wrap" Text="{Binding ProgBarTextDB}" Height="16" VerticalAlignment="Top" TextAlignment="Center"/>
+        <Label Content="{Binding ProgBarLoadCount}" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

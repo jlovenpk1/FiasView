@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FiasView.MVVM;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,10 +20,11 @@ namespace FiasView.UI
     /// </summary>
     public partial class progressBar : Window
     {
-        
-        public progressBar()
+
+        public progressBar(ViewModel vm)
         {
             InitializeComponent();
+            this.DataContext = vm;
         }
     }
 }

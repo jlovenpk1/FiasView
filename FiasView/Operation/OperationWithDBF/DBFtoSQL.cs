@@ -67,7 +67,7 @@ namespace FiasView.Operation.OperationWithDBF
         /// </summary>
         async public void GetSQLData()
         {
-            _progress = new progressBar();
+            _progress = new progressBar(mv);
 
             if (OpenFiles())
             {

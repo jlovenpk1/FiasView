@@ -8,13 +8,14 @@ using FiasView.UI;
 using System.Data;
 using MySql.Data.EntityFramework;
 using System.Windows;
+using FiasView.MVVM;
 
 namespace FiasView.Operation.WorkWithExcel
 {
     class LoadExcelToGrid
     {
         private DataTable _data;
-        private List<string> _pAdress;
+        private Model1 _db;
         private string _firstColumn = string.Empty;
         private string _secondColumn = string.Empty;
         private string[] _adress;
@@ -24,11 +25,13 @@ namespace FiasView.Operation.WorkWithExcel
         private string _city = string.Empty;
         private string _street = string.Empty;
         private string _house = string.Empty;
+        private string _fiasCode = string.Empty;
         private struct Columns
         {
             public static string _city = "Город";
             public static string _street = "Улица";
             public static string _house = "Дом";
+            public static string _fiasCode = "Фиас индетификатор";
         }
 
         public DataTable OpenExcel(XLWorkbook workbook, string _firstColumn, string _secondColumn)
@@ -61,6 +64,7 @@ namespace FiasView.Operation.WorkWithExcel
             _data.Columns.Add(Columns._city);
             _data.Columns.Add(Columns._street);
             _data.Columns.Add(Columns._house);
+            _data.Columns.Add(Columns._fiasCode);
             for (int i = 0; i < _data.Rows.Count; i++)
             {
                _adress = _data.Rows[i][_firstColumn].ToString().Split(new char[] {','});
@@ -88,80 +92,185 @@ namespace FiasView.Operation.WorkWithExcel
                     --i;
                 }
             }
+            _data.Columns.Add(Columns._city);
+            _data.Columns.Add(Columns._street);
+            _data.Columns.Add(Columns._house);
+            for (int i = 0; i < _data.Rows.Count; i++)
+            {
+                _adress = _data.Rows[i][_firstColumn].ToString().Split(new char[] { ',' });
+                ParsingAdress(_data.Rows[i][_firstColumn].ToString());
+                _data.Rows[i][Columns._city] = _city;
+                _data.Rows[i][Columns._street] = _street;
+                _data.Rows[i][Columns._house] = _house;
+            }
             return _data;
         }
 
         private void ParsingAdress(string adress)
         {
-            int oldCityIndex = 0;
-            int oldStreetIndex = 0;
-            bool checkCity = false, checkStreet = false;
-            _pAdress = adress.Split(new char[] { ',', '.' }).ToList();
+            string test = string.Empty;
+            adress = adress.Replace("№", "");
+            List<string> _pAdress = adress.Split(new char[] { ',', }).ToList();
             string error = string.Empty;
-            List<string> city = new List<string>() { "город.", "г.", "город", "г" };
-            List<string> street = new List<string>() { "улица", "ул", "у", "ул.", "улица.", "у.", "пер", "переулок" };
-            List<string> house = new List<string>() { "дом.", "д.", "дом", "д" };
+            List<string> city = new List<string>() {
+                "город.", "г.", "город", "г",
+                "город. ", "г. ", "город ", "г ",
+                " город.", " г.", " город", " г" };
+            List<string> street = new List<string>() {
+                " улица", " ул", " у", " ул.", " улица.", " у.", " пер", " пер.", " переулок", " проспект"," пр-кт"," проспект."," п-к"," площадь"," пл"," пл."," проезд"," п-д",
+                "улица ", "ул ", "у ", "ул. ", "улица. ", " у. ", "пер ", "пер. ", "переулок ","проспект ","пр-кт ","проспект. ","п-к ","площадь ","пл ","пл. ","проезд ","п-д ",
+                "улица", "ул", "у", "ул.", "улица.", "у.", "пер", "переулок", "пер.","проспект","пр-кт","проспект.","п-к","площадь","пл","пл.","проезд","п-д" };
+            List<string> house = new List<string>() {
+                "дом.", "д.", "дом", "д",
+                " дом.", " д.", " дом", " д",
+                "дом. ", "д. ", "дом ", "д " };
+            #region Магия Индии и Китая в одном флаконе
             try
             {
+                _street = "Проверьте адрес!";
                 for (int i = 0; i < _pAdress.Count; i++)
                 {
-                    if (_pAdress.Count < 7) { break; }
-                    if (checkCity == false)
+                    
+                    for (int x = 0; x < city.Count; x++)
                     {
-                        if (_pAdress[i] == "Астрахань" && (city.Contains(_pAdress[i + 1]) || city.Contains(_pAdress[i - 1])) || _pAdress[i] == "Астрахань")
+                        if (_pAdress[i].StartsWith(city[x]))
                         {
-                            _city = _pAdress[i];
-                            oldCityIndex = i;
-                            i++;
-                            checkCity = true;
-
+                            //test += _pAdress[i].Replace(city[x], "");
+                            _city = _pAdress[i].Replace(city[x], "");
+                            var posStart = _city.IndexOf(" ");
+                            var posLast = _city.LastIndexOf(" ");
+                            break;
                         }
-                    }
-                    if (checkStreet == false)
-                    {
-                        if (oldCityIndex < i && (street.Contains(_pAdress[i + 1]) || street.Contains(_pAdress[i - 1])))
+                        else if (_pAdress[i].EndsWith(city[x]))
                         {
-                            _street = _pAdress[i];
-                            oldStreetIndex = i;
-                            i++;
-                            checkStreet = true;
-                            error = string.Join(", ",_pAdress.ToArray());
-                        }
-                    }
-                    if (house.Contains(_pAdress[i]))
-                    {
-                        if (oldStreetIndex < i && (house.Contains(_pAdress[i + 1]) || (house.Contains(_pAdress[i - 1]))))
-                        {
-                            _house = _pAdress[i];
+                            //test += _pAdress[i].Replace(city[x], "");
+                            _city = _pAdress[i].Replace(city[x], "");
                             break;
                         }
                     }
-                    else
+
+                    for (int x = 0; x < street.Count; x++)
                     {
+                        if (_pAdress[i].StartsWith(street[x]) || _pAdress[i].IndexOf("/") > 0)
                         {
-                            if (oldStreetIndex < i && (house.Contains(_pAdress[i - 1])))
+                            //test += _pAdress[i].Replace(street[x], "");
+                            _street = _pAdress[i].Replace(street[x], "");
+                            var posStart = _street.IndexOf(" ");
+                            _street = posStart < 0 ? _street : _street.Remove(posStart, 1);
+                            var posLast = _street.LastIndexOf(" ");
+                            _street = posLast < 0 ? _street : _street.Remove(posLast, 1);
+                            if (_street.IndexOf("/") > 0)
                             {
-                                _house = _pAdress[i];
-                                break;
+                                _street = _street.IndexOf("/") > 0 ? _street.Remove(_street.IndexOf("/"), _street.Length - _street.IndexOf("/")) : _street;
+                                _street = _street.IndexOf("ул") > 0 ? _street.Remove(_street.IndexOf("ул"), _street.Length - _street.IndexOf("ул")) : _street;
+                                _street = _street.IndexOf("ул.") > 0 ? _street.Remove(_street.IndexOf("ул."), _street.Length - _street.IndexOf("ул.")) : _street;
+                                _street = _street.IndexOf("пер") > 0 ? _street.Remove(_street.IndexOf("пер"), _street.Length - _street.IndexOf("пер")) : _street;
+                                _street = _street.IndexOf("пер.") > 0 ? _street.Remove(_street.IndexOf("пер."), _street.Length - _street.IndexOf("пер.")) : _street;
                             }
+                            break;
+                        }
+                        else if (_pAdress[i].EndsWith(street[x]) || _pAdress[i].IndexOf("/") > 0)
+                        {
+                            //test += _pAdress[i].Replace(street[x], "");
+                            _street = _pAdress[i].Replace(street[x], "");
+                            var posStart = _street.IndexOf(" ");
+                            _street = posStart < 0 ? _street : _street.Remove(posStart, 1);
+                            var posLast = _street.LastIndexOf(" ");
+                            _street = posLast < 0 ? _street :_street.Remove(posLast, 1);
+                            if (_street.IndexOf("/") > 0)
+                            {
+                                _street = _street.IndexOf("/") > 0 ? _street.Remove(_street.IndexOf("/"), _street.Length - _street.IndexOf("/")) : _street;
+                                _street = _street.IndexOf("ул") > 0 ? _street.Remove(_street.IndexOf("ул"), _street.Length - _street.IndexOf("ул")) : _street;
+                                _street = _street.IndexOf("ул.") > 0 ? _street.Remove(_street.IndexOf("ул."), _street.Length - _street.IndexOf("ул.")) : _street;
+                                _street = _street.IndexOf("пер") > 0 ? _street.Remove(_street.IndexOf("пер"), _street.Length - _street.IndexOf("пер")) : _street;
+                                _street = _street.IndexOf("пер.") > 0 ? _street.Remove(_street.IndexOf("пер."), _street.Length - _street.IndexOf("пер.")) : _street;
+                            }
+                            break;
+                        }
+                    }
+
+                    for (int x = 0; x < house.Count; x++)
+                    {
+                        if (_pAdress[i].EndsWith(house[x]))
+                        {
+                            //test += _pAdress[i].Replace(house[x], "");
+                            _house = _pAdress[i].Replace(house[x], "");
+                            var posStart = _house.IndexOf(" ");
+                            _house = posStart < 0 ? _house : _house.Remove(posStart, 1);
+                            var posLast = _house.LastIndexOf(" ");
+                            _house = posLast < 0 ? _house : _house.Remove(posLast, 1);
+                            break;
+                        }
+                        else if (_pAdress[i].StartsWith(house[x]))
+                        {
+                            //test += _pAdress[i].Replace(house[x], "");
+                            _house = _pAdress[i].Replace(house[x], "");
+                            if (_house.Length > 10)
+                            {
+                                var pos = _house.LastIndexOf(' ');
+                                _house = _house.Substring(0, pos);
+                            }
+                            _house = _house.Replace(" ", "");
+                            var posStart = _house.IndexOf(" ");
+                            _house = posStart < 0 ? _house : _house.Remove(posStart, 1);
+                            var posLast = _house.LastIndexOf(" ");
+                            _house = posLast < 0 ? _house : _house.Remove(posLast, 1);
+                            break;
                         }
                     }
                 }
-            } 
+                //MessageBox.Show(test);
+            }
             catch(Exception ex)
             {
-                MessageBox.Show("Ошибка в: "+error);
+                MessageBox.Show("Ошибка: " + ex);
             }
-            
+            #endregion
         }
-        private string FiasCode(string[] adress)
+
+        public DataTable GetFiasCode(ViewModel vm)
         {
-            string _code = string.Empty;
+            _db = new Model1();
+            for (int i = 0; i < _data.Rows.Count; i++)
+            {
+                
+                _street = _data.Rows[i][Columns._street].ToString();
+                _house = _data.Rows[i][Columns._house].ToString();
+                var query = _db.addrob30.Where(q => q.OFFNAME == _street).ToList();
+                var result = query.Count > 0 ? ParseFiasCode(query) : "Фиас Код не обнаружен!";
+                _data.Rows[i][Columns._fiasCode] = result;
+                vm.ProgBarMaxValue = _data.Rows.Count;
+                vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
+                vm.ProgBarLoadDB = i;
+                vm.ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
+                //_progress.Dispatcher.BeginInvoke(new Action(() => { _progress._progbar.DataContext = vm; }));
+            }
+            return _data;
+        }
 
-            Model1 db = new Model1();
-            var result = db.addrob30.Where(x => x.OFFNAME == "Вильнюсская").Select(x => x.AOGUID);
-
-            return _code;
+        private string ParseFiasCode(List<addrob30> query)
+        {
+            string AOGUID = string.Empty;
+            foreach (addrob30 _st in query)
+            {
+                if (_st.AOLEVEL == 7)
+                {
+                    AOGUID = _st.AOGUID;
+                    break;
+                }
+            }
+            var _query = _db.house30.Where(q => q.AOGUID == AOGUID).ToList();
+            if (_query.Count != 0)
+            {
+                foreach (house30 _hs in _query)
+                {
+                    if (_hs.HOUSENUM  == _house)
+                    {
+                        _fiasCode = _hs.HOUSEID;
+                    }
+                }
+            }
+            return _fiasCode;
         }
     }
 }

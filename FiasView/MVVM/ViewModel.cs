@@ -11,7 +11,9 @@ namespace FiasView.MVVM
     public class ViewModel : INotifyPropertyChanged
     {
         private int _progBarLoadDB;
+        private int _progBarMaxValue;
         private string _progBarTextDB;
+        private string _progBarLoadCount;
         public int ProgBarLoadDB
         {
             get { return _progBarLoadDB; }
@@ -21,6 +23,15 @@ namespace FiasView.MVVM
                 OnPropertyChanged("ProgBarLoadDB");
             }
         }
+        public int ProgBarMaxValue
+        {
+            get { return _progBarMaxValue; }
+            set
+            {
+                _progBarMaxValue = value;
+                OnPropertyChanged("ProgBarMaxValue");
+            }
+        }
         public string ProgBarTextDB
         {
             get { return _progBarTextDB; }
@@ -28,6 +39,15 @@ namespace FiasView.MVVM
             {
                 _progBarTextDB = value;
                 OnPropertyChanged("ProgBarTextDB");
+            }
+        }
+        public string ProgBarLoadCount
+        {
+            get { return _progBarLoadCount; }
+            set
+            {
+                _progBarLoadCount = value;
+                OnPropertyChanged("ProgBarLoadCount");
             }
         }
 

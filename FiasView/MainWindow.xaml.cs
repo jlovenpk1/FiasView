@@ -20,6 +20,7 @@ using FiasView.Forms;
 using FiasView.Operation.WorkWithExcel;
 using FiasView.Operation.OperationWithDBF;
 using FiasView.UI;
+using FiasView.MVVM;
 
 namespace FiasView
 {
@@ -36,6 +37,7 @@ namespace FiasView
         Model1 db;
         DBFtoSQL dts;
         progressBar _progress;
+        ViewModel vm;
         string _path;
         public string _firstColumn = "";
         public string _secondColumn = "";
@@ -43,7 +45,9 @@ namespace FiasView
         public MainWindow()
         {
             InitializeComponent();
-            
+            vm = new ViewModel();
+            _data = new DataTable();
+
         }
 
         /// <summary>
@@ -60,19 +64,22 @@ namespace FiasView
             };
             if (_fileOpen.ShowDialog() == true) {_path = _fileOpen.FileName;}
             _excelWork = new LoadExcelToGrid();
-            _data = new DataTable();
+            
             _selectColumn = new Window1();
-            _progress = new progressBar();
+            _progress = new progressBar(vm);
             _selectColumn.ShowDialog();
             _selectColumn_Closed();
             _fileOpen.Reset();
-            
+            _excelWork = new LoadExcelToGrid();
             await Task.Run(new Action(() =>
             {
-                _progress.Dispatcher.BeginInvoke(new Action(delegate { _progress.Show(); _progress._progbar.IsIndeterminate = true; }));
-                _data = new LoadExcelToGrid().OpenExcel(_workbook = new XLWorkbook(_path), _firstColumn, _secondColumn);
-            }));
-            _progress.Close();
+                _progress.Dispatcher.BeginInvoke(new Action(delegate 
+                {
+                    _progress.Show();
+                    _progress._progbar.IsIndeterminate = true; }));
+                    _data = _excelWork.OpenExcel(_workbook = new XLWorkbook(_path), _firstColumn, _secondColumn);
+                }));
+            _progress.Hide();
             _dataGrid.ItemsSource = _data.DefaultView;
         }
 
@@ -134,58 +141,122 @@ namespace FiasView
                 }
         }
 
-        private void _start_Click(object sender, RoutedEventArgs e)
+        async void _start_Click(object sender, RoutedEventArgs e)
         {
-            string adress = "414050, Российская Федерация, область Астраханская ,город. Астрахань, улица Николая Островского, 76а дом, кв.1";
-            string test = string.Empty;
-            int oldCityIndex = 0;
-            int oldStreetIndex = 0;
-            bool checkCity = false, checkStreet = false;
-            List<string> _pAdress = adress.Split(new char[] { ','}).ToList();
-            string error = string.Empty;
-            List<string> city = new List<string>() { "город.", "г.", "город", "г" };
-            List<string> street = new List<string>() { " улица", "ул", "у", "ул.", "улица.", "у.", "пер", "переулок" };
-            List<string> house = new List<string>() { "дом.", "д.", " дом", "д" };
-            
-            try
+            _data.Dispose();
+            _data = new DataTable();
+            await Task.Run(new Action(() => 
             {
-                
-                for (int i = 0; i < _pAdress.Count; i++)
+                _progress.Dispatcher.BeginInvoke(new Action(delegate
                 {
-                    for (int x = 0; x < city.Count; x++)
-                    {
-                        if (_pAdress[i].StartsWith(city[x]))
-                        {
-                                test += _pAdress[i].Replace(city[x], "");
-                                break;
-                        }
-                    }
+                    _progress.Show();
+                    _progress._progbar.IsIndeterminate = false;
+                }));
+                _data = _excelWork.GetFiasCode(vm);
+            }));
+            _progress.Hide();
+            _dataGrid.ItemsSource = _data.DefaultView;
+            _dataGrid.UpdateDefaultStyle();
+            #region Для тестов с персингом адреса
+            //string adress = "414038, Астраханская обл, Астрахань г, Грановский пер, дом № 59"; 
+            //List<string> adress = new List<string>() {
+            //    "414000, Астраханская обл, Астрахань г, Урицкого ул/Тихий пер., дом № 29/7, литера А, помещение 1",
+            //    //"414032, Астраханская обл, Астрахань г, Жилая ул, дом № 1 п 8а",
+            //    //"414000, Астраханская обл, Астрахань г, Красная Набережная ул, дом № 92 А, помещение 006",
+            //    //"Кировский ул.Кр.Набережная д.92\"А\"",
+            //    //"414004, Астраханская обл, Астрахань г, С.Перовской ул, дом № 73, помещение 4",
+            //    //"Астраханская обл, Астрахань г, Коммунистическая ул/Молодой Гвардии ул, дом № 8/8, помещение 003",
+            //    //"Астраханская обл, Астрахань г, Коммунистическая ул",
+            //};
+            //for (int c = 0; c < adress.Count; c++)
+            //{
 
-                    for (int x = 0; x < street.Count; x++)
-                    {
-                        if (_pAdress[i].StartsWith(street[x]))
-                        {
-                                test += _pAdress[i].Replace(street[x], "");
-                                break;
-                        }
-                    }
+            //string test = string.Empty;
+            //var newLine = adress[c].Replace("№", "");
+            //List<string> _pAdress = newLine.Split(new char[] { ',', }).ToList();
+            //string error = string.Empty;
+            //List<string> city = new List<string>() { "город.", "г.", "город", "г", "город. ", "г. ", "город ", "г ", " город.", " г.", " город", " г" };
+            //List<string> street = new List<string>() { " улица", " ул", " у", " ул.", " улица.", " у.", " пер"," пер.", " переулок", "улица ", "ул ", "у ", "ул. ", "улица. ", " у. ", "пер ","пер. ", "переулок ", "улица", "ул", "у", "ул.", "улица.", "у.", "пер", "переулок", "пер." };
+            //List<string> house = new List<string>() { "дом.", "д.", "дом", "д", " дом.", " д.", " дом", " д", "дом. ", "д. ", "дом ", "д " };
 
-                    for (int x = 0; x < house.Count; x++)
-                    {
-                        if (_pAdress[i].EndsWith(house[x]))
-                        {
-                                test += _pAdress[i].Replace(house[x], "");
-                                break;
-                        }
-                    }
+            //try
+            //{
 
-                }
-                MessageBox.Show(test);
-            }
-            catch
-            {
-                MessageBox.Show("Ошибка: "+error);
-            }
+            //    for (int i = 0; i < _pAdress.Count; i++)
+            //    {
+            //        for (int x = 0; x < city.Count; x++)
+            //        {
+            //            if (_pAdress[i].StartsWith(city[x]))
+            //            {
+            //                test += _pAdress[i].Replace(city[x], "");
+            //                    var posStart = test.IndexOf(" ");
+            //                    test = test.Remove(posStart, 1);
+            //                    var posLast = test.LastIndexOf(" ");
+            //                    test = test.Remove(posLast, 1);
+            //                    break;
+            //            }
+            //            else if (_pAdress[i].EndsWith(city[x]))
+            //            {
+            //                test += _pAdress[i].Replace(city[x], "");
+            //                    break;
+            //            }
+            //        }
+
+            //        for (int x = 0; x < street.Count; x++)
+            //        {
+            //            if (_pAdress[i].StartsWith(street[x]))
+            //            {
+            //                    _pAdress[i].Replace(street[x], "");
+            //                    var posStart = _pAdress[i].IndexOf(" ");
+            //                    _pAdress[i].Remove(posStart, 1);
+            //                    var posLast = _pAdress[i].LastIndexOf(" ");
+            //                    test += _pAdress[i].Remove(posLast, 1);
+            //                    break;
+            //            }
+            //            else if (_pAdress[i].EndsWith(street[x]))
+            //            {
+            //                    var text = _pAdress[i].Replace(street[x], "");
+            //                    var posStart = text.IndexOf(" ");
+            //                    text = text.Remove(posStart, 1);
+            //                    if (text.IndexOf("/") > 0)
+            //                    {
+            //                        text = text.Remove(text.IndexOf("/"),text.Length - text.IndexOf("/"));
+            //                        text = text.Remove(text.IndexOf("ул"), text.Length - text.IndexOf("ул"));
+            //                    }
+            //                    var posLast = text.LastIndexOf(" ");
+            //                    test += text.Remove(posLast, 1);
+            //                    break;
+            //            }
+            //        }
+
+            //        for (int x = 0; x < house.Count; x++)
+            //        {
+            //            if (_pAdress[i].EndsWith(house[x]))
+            //            {
+            //                test += _pAdress[i].Replace(house[x], "");
+            //                break;
+            //            }
+            //            else if (_pAdress[i].StartsWith(house[x]))
+            //            {
+            //                    var text = _pAdress[i].Replace(house[x], "");
+            //                    var post = text.IndexOf(" ");
+            //                    text = text.Remove(post, 1);
+            //                    var pos = text.LastIndexOf(" ");
+            //                    text = text.Remove(pos, 1);
+            //                    test += text;
+            //                    break;
+            //            }
+            //        }
+
+            //    }
+            //    MessageBox.Show(test);
+            //}
+            //catch
+            //{
+            //    MessageBox.Show("Ошибка: " + error);
+            //}
+            //}
+            #endregion
             #region oldShit
             //for (int i = 0; i < ArrayString.Length; i++)
             //{
@@ -229,7 +300,6 @@ namespace FiasView
 
             //}
             #endregion
-
         }
 
         private void UpdateAddrCorrect_Click(object sender, RoutedEventArgs e)
