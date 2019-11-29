@@ -107,6 +107,10 @@ namespace FiasView.Operation.WorkWithExcel
             return _data;
         }
 
+        /// <summary>
+        /// Парсинг адреса на: Адрес, Улица, Дом. Шаблон: город Астрахань, улица Джедая, дом 46(все А,Б,С и прочие корпусы, пишутся вот так: 46а)
+        /// </summary>
+        /// <param name="adress">Адрес шаблон: город Астрахань, улица Джедая, дом 46а</param>
         private void ParsingAdress(string adress)
         {
             string test = string.Empty;
@@ -229,6 +233,11 @@ namespace FiasView.Operation.WorkWithExcel
             #endregion
         }
 
+        /// <summary>
+        /// Получение Фиас Кода с записью его в DataTable Column = "Фиас Индетификатор"
+        /// </summary>
+        /// <param name="vm">ViewModel</param>
+        /// <returns></returns>
         public DataTable GetFiasCode(ViewModel vm)
         {
             _db = new Model1();
