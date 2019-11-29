@@ -16,6 +16,7 @@ namespace FiasView.Operation.WorkWithExcel
     {
         private DataTable _data;
         private Model1 _db;
+        private MainWindow mv;
         private string _firstColumn = string.Empty;
         private string _secondColumn = string.Empty;
         private string[] _adress;
@@ -158,7 +159,7 @@ namespace FiasView.Operation.WorkWithExcel
                             var posStart = _street.IndexOf(" ");
                             _street = posStart < 0 ? _street : _street.Remove(posStart, 1);
                             var posLast = _street.LastIndexOf(" ");
-                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 ? _street : _street.Remove(posLast, 1);
+                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 || posLast > 0 && _pAdress[i].Length > 8 ? _street : _street.Remove(posLast, 1);
                             if (_street.IndexOf("/") > 0)
                             {
                                 _street = _street.IndexOf("/") > 0 ? _street.Remove(_street.IndexOf("/"), _street.Length - _street.IndexOf("/")) : _street;
@@ -176,7 +177,7 @@ namespace FiasView.Operation.WorkWithExcel
                             var posStart = _street.IndexOf(" ");
                             _street = posStart < 0 ? _street : _street.Remove(posStart, 1);
                             var posLast = _street.LastIndexOf(" ");
-                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 ? _street :_street.Remove(posLast, 1);
+                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 || posLast > 0 && _pAdress[i].Length > 8 ? _street :_street.Remove(posLast, 1);
                             if (_street.IndexOf("/") > 0)
                             {
                                 _street = _street.IndexOf("/") > 0 ? _street.Remove(_street.IndexOf("/"), _street.Length - _street.IndexOf("/")) : _street;
@@ -250,6 +251,7 @@ namespace FiasView.Operation.WorkWithExcel
 
         private string ParseFiasCode(List<addrob30> query)
         {
+            _fiasCode = string.Empty;
             string AOGUID = string.Empty;
             foreach (addrob30 _st in query)
             {
@@ -259,17 +261,15 @@ namespace FiasView.Operation.WorkWithExcel
                     break;
                 }
             }
-            var _query = _db.house30.Where(q => q.AOGUID == AOGUID).ToList();
+            var _query = _db.house30.Where(q => q.AOGUID == AOGUID && q.HOUSENUM == _house).ToList();
             if (_query.Count != 0)
             {
                 foreach (house30 _hs in _query)
                 {
-                    if (_hs.HOUSENUM  == _house)
-                    {
                         _fiasCode = _hs.HOUSEID;
-                    }
+                        break;
                 }
-            }
+            } else { _fiasCode = "Фиас Код не обнаружен!";}
             return _fiasCode;
         }
     }

@@ -18,7 +18,8 @@
             </MenuItem>
 
         </Menu>
-        <DataGrid Name="_dataGrid" Margin="0,26,0,25" Focusable="False"/>
+        <DataGrid Name="_dataGrid" Margin="0,26,0,25" Focusable="False" LoadingRow="_dataGrid_LoadingRow">
+        </DataGrid>
         <ProgressBar Value="{Binding ProgBarLoadDB}" Name="ProgressWork" Height="25" VerticalAlignment="Bottom" IsIndeterminate="False"/>
         <Button Name="_start" HorizontalAlignment="Left" Margin="162,0,0,0" VerticalAlignment="Top" Width="35" IsEnabled="true" Background="{x:Null}" Height="26" BorderBrush="{x:Null}" Foreground="{x:Null}" Click="_start_Click">
             <Image Source="img/start.png" Height="20" Width="35"></Image></Button>

@@ -21,6 +21,7 @@ using FiasView.Operation.WorkWithExcel;
 using FiasView.Operation.OperationWithDBF;
 using FiasView.UI;
 using FiasView.MVVM;
+using System.Collections;
 
 namespace FiasView
 {
@@ -29,6 +30,11 @@ namespace FiasView
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const string _street = "Улица";
+        private const string _checkStreet = "Проверьте адрес!";
+        private const string _FiasColumn = "Фиас индетификатор";
+        private const string _checkFiasColumn = "Фиас Код не обнаружен!";
+        public bool _DGWithFiasCode = false;
         LoadExcelToGrid _excelWork;
         OpenFileDialog _fileOpen;
         XLWorkbook _workbook;
@@ -38,6 +44,7 @@ namespace FiasView
         DBFtoSQL dts;
         progressBar _progress;
         ViewModel vm;
+        DataTable _oldData;
         string _path;
         public string _firstColumn = "";
         public string _secondColumn = "";
@@ -47,6 +54,7 @@ namespace FiasView
             InitializeComponent();
             vm = new ViewModel();
             _data = new DataTable();
+            _dataGrid.CanUserAddRows = false;
 
         }
 
@@ -79,8 +87,11 @@ namespace FiasView
                     _progress._progbar.IsIndeterminate = true; }));
                     _data = _excelWork.OpenExcel(_workbook = new XLWorkbook(_path), _firstColumn, _secondColumn);
                 }));
-            _progress.Hide();
+            _oldData = _data;
             _dataGrid.ItemsSource = _data.DefaultView;
+            _progress.Hide();
+            
+            
         }
 
         /// <summary>
@@ -144,7 +155,9 @@ namespace FiasView
         async void _start_Click(object sender, RoutedEventArgs e)
         {
             _data.Dispose();
+            
             _data = new DataTable();
+            this.Hide();
             await Task.Run(new Action(() => 
             {
                 _progress.Dispatcher.BeginInvoke(new Action(delegate
@@ -154,9 +167,11 @@ namespace FiasView
                 }));
                 _data = _excelWork.GetFiasCode(vm);
             }));
+            this.Show();
             _progress.Hide();
+            _DGWithFiasCode = true;
             _dataGrid.ItemsSource = _data.DefaultView;
-            _dataGrid.UpdateDefaultStyle();
+            _dataGrid.Items.Refresh();
             #region Для тестов с персингом адреса
             //string adress = "414038, Астраханская обл, Астрахань г, Грановский пер, дом № 59"; 
             //List<string> adress = new List<string>() {
@@ -311,6 +326,16 @@ namespace FiasView
         private void FindOneAdress_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+        private SolidColorBrush hb = new SolidColorBrush(Colors.Orange);
+        private SolidColorBrush nb = new SolidColorBrush(Colors.White);
+        private void _dataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            int i = e.Row.GetIndex();
+            //var cc = _data.Rows[i]["Улица"]; // для тестов
+            e.Row.Background = _oldData.Rows[i][_street].ToString() == _checkStreet ? e.Row.Background = Brushes.Red : e.Row.Background = Brushes.LightGreen;
+            if (_DGWithFiasCode == true) { e.Row.Background = _oldData.Rows[i][_FiasColumn].ToString() == _checkFiasColumn ? e.Row.Background = Brushes.Red : e.Row.Background = Brushes.LightGreen; }
+            
         }
     }
 }
