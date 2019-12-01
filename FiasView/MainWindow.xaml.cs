@@ -35,6 +35,7 @@ namespace FiasView
         private const string _FiasColumn = "Фиас индетификатор";
         private const string _checkFiasColumn = "Фиас Код не обнаружен!";
         public bool _DGWithFiasCode = false;
+        private Dictionary<int,house30> _cacheAdrr;
         LoadExcelToGrid _excelWork;
         OpenFileDialog _fileOpen;
         XLWorkbook _workbook;
@@ -154,8 +155,8 @@ namespace FiasView
 
         async void _start_Click(object sender, RoutedEventArgs e)
         {
+
             _data.Dispose();
-            
             _data = new DataTable();
             this.Hide();
             await Task.Run(new Action(() => 

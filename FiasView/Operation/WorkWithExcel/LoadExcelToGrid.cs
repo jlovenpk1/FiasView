@@ -17,6 +17,8 @@ namespace FiasView.Operation.WorkWithExcel
         private DataTable _data;
         private Model1 _db;
         private MainWindow mv;
+        Dictionary<int, addrob30> _cacheAdrr;
+        Dictionary<int, house30> _cacheHouse;
         private string _firstColumn = string.Empty;
         private string _secondColumn = string.Empty;
         private string[] _adress;
@@ -241,6 +243,22 @@ namespace FiasView.Operation.WorkWithExcel
         public DataTable GetFiasCode(ViewModel vm)
         {
             _db = new Model1();
+            _cacheAdrr = new Dictionary<int, addrob30>();
+            _cacheHouse = new Dictionary<int, house30>();
+            var _addr = _db.addrob30.ToList();
+            var _house30 = _db.house30.ToList();
+            int index = 0;
+            foreach (addrob30 x in _addr)
+            {
+                index++;
+                _cacheAdrr.Add(index, x);
+            }
+            index = 0;
+            foreach (house30 h in _house30)
+            {
+                index++;
+                _cacheHouse.Add(index, h);
+            }
             for (int i = 0; i < _data.Rows.Count; i++)
             {
                 
@@ -255,22 +273,34 @@ namespace FiasView.Operation.WorkWithExcel
                 vm.ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
                 //_progress.Dispatcher.BeginInvoke(new Action(() => { _progress._progbar.DataContext = vm; }));
             }
+            for (int i = 0; i < _data.Rows.Count; i++)
+            {
+                _street = _data.Rows[i][Columns._street].ToString();
+                _house = _data.Rows[i][Columns._street].ToString();
+                var query = _cacheAdrr.Where(q => q.Value.OFFNAME == _street).ToList();
+                var result = query.Count > 0 ? ParseFiasCodeString() : "Фиас Код не обнаружен!";
+                _data.Rows[i][Columns._fiasCode] = result;
+                vm.ProgBarMaxValue = _data.Rows.Count;
+                vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
+                vm.ProgBarLoadDB = i;
+                vm.ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
+            }
             return _data;
         }
 
         private string ParseFiasCode(List<addrob30> query)
         {
             _fiasCode = string.Empty;
-            string AOGUID = string.Empty;
+            string aoguid = string.Empty;
             foreach (addrob30 _st in query)
             {
                 if (_st.AOLEVEL == 7)
                 {
-                    AOGUID = _st.AOGUID;
+                    aoguid = _st.AOGUID;
                     break;
                 }
             }
-            var _query = _db.house30.Where(q => q.AOGUID == AOGUID && q.HOUSENUM == _house).ToList();
+            var _query = _db.house30.Where(q => q.AOGUID == aoguid && q.HOUSENUM == _house).ToList();
             if (_query.Count != 0)
             {
                 foreach (house30 _hs in _query)
@@ -278,8 +308,12 @@ namespace FiasView.Operation.WorkWithExcel
                         _fiasCode = _hs.HOUSEID;
                         break;
                 }
-            } else { _fiasCode = "Фиас Код не обнаружен!";}
+            } else { _fiasCode = "фиас код не обнаружен!";}
             return _fiasCode;
+        }
+        private string ParseFiasCodeString()
+        {
+           
         }
     }
 }
