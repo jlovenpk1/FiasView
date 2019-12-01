@@ -311,9 +311,13 @@ namespace FiasView.Operation.WorkWithExcel
             } else { _fiasCode = "фиас код не обнаружен!";}
             return _fiasCode;
         }
-        private string ParseFiasCodeString()
+        private string ParseFiasCodeString(List<KeyValuePair<int,addrob30>> query, List<KeyValuePair<int, house30>> query2)
         {
-           
+            _fiasCode = string.Empty;
+            string aoguid = string.Empty;
+
+
+            return _fiasCode;
         }
     }
 }
