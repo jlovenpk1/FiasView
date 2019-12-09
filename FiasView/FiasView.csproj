@@ -116,10 +116,14 @@
     <Compile Include="house30.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="MVVM\ViewModel.cs" />
+    <Compile Include="Operation\LoadAllTable.cs" />
     <Compile Include="Operation\OperationWithDBF\DBFtoSQL.cs" />
     <Compile Include="Operation\OperationWithDBF\Operation.cs" />
     <Compile Include="Operation\WorkWithExcel\LoadExcelToGrid.cs" />
     <Compile Include="room30.cs" />
+    <Compile Include="StartUp.xaml.cs">
+      <DependentUpon>StartUp.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\progressBar.xaml.cs">
       <DependentUpon>progressBar.xaml</DependentUpon>
     </Compile>
@@ -147,6 +151,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="StartUp.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\progressBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -184,6 +192,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="img\logotip01.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

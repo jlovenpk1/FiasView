@@ -243,42 +243,47 @@ namespace FiasView.Operation.WorkWithExcel
         public DataTable GetFiasCode(ViewModel vm)
         {
             _db = new Model1();
+            _db.Database.CommandTimeout = 300;
             _cacheAdrr = new Dictionary<int, addrob30>();
             _cacheHouse = new Dictionary<int, house30>();
-            var _addr = _db.addrob30.ToList();
-            var _house30 = _db.house30.ToList();
+            List<addrob30> _addr = _db.addrob30.ToList();
             int index = 0;
+            vm.ProgBarTextDB = "Ожидайте загружаю Улицы";
             foreach (addrob30 x in _addr)
             {
+                
                 index++;
                 _cacheAdrr.Add(index, x);
             }
+            List<house30> _house30 = _db.house30.ToList();
             index = 0;
+            vm.ProgBarMaxValue = _addr.Count;
             foreach (house30 h in _house30)
             {
+                vm.ProgBarTextDB = "Загруженно: " + index + " из " + _addr.Count;
                 index++;
                 _cacheHouse.Add(index, h);
             }
+            //for (int i = 0; i < _data.Rows.Count; i++)
+            //{
+
+            //    _street = _data.Rows[i][Columns._street].ToString();
+            //    _house = _data.Rows[i][Columns._house].ToString();
+            //    var query = _db.addrob30.Where(q => q.OFFNAME == _street).ToList();
+            //    var result = query.Count > 0 ? ParseFiasCode(query) : "Фиас Код не обнаружен!";
+            //    _data.Rows[i][Columns._fiasCode] = result;
+            //    vm.ProgBarMaxValue = _data.Rows.Count;
+            //    vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
+            //    vm.ProgBarLoadDB = i;
+            //    vm.ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
+            //    //_progress.Dispatcher.BeginInvoke(new Action(() => { _progress._progbar.DataContext = vm; }));
+            //}
             for (int i = 0; i < _data.Rows.Count; i++)
             {
-                
                 _street = _data.Rows[i][Columns._street].ToString();
                 _house = _data.Rows[i][Columns._house].ToString();
-                var query = _db.addrob30.Where(q => q.OFFNAME == _street).ToList();
-                var result = query.Count > 0 ? ParseFiasCode(query) : "Фиас Код не обнаружен!";
-                _data.Rows[i][Columns._fiasCode] = result;
-                vm.ProgBarMaxValue = _data.Rows.Count;
-                vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
-                vm.ProgBarLoadDB = i;
-                vm.ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
-                //_progress.Dispatcher.BeginInvoke(new Action(() => { _progress._progbar.DataContext = vm; }));
-            }
-            for (int i = 0; i < _data.Rows.Count; i++)
-            {
-                _street = _data.Rows[i][Columns._street].ToString();
-                _house = _data.Rows[i][Columns._street].ToString();
                 var query = _cacheAdrr.Where(q => q.Value.OFFNAME == _street).ToList();
-                var result = query.Count > 0 ? ParseFiasCodeString() : "Фиас Код не обнаружен!";
+                var result = query.Count > 0 ? ParseFiasCodeString(query,_cacheHouse) : "Фиас Код не обнаружен!";
                 _data.Rows[i][Columns._fiasCode] = result;
                 vm.ProgBarMaxValue = _data.Rows.Count;
                 vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
@@ -287,6 +292,11 @@ namespace FiasView.Operation.WorkWithExcel
             }
             return _data;
         }
+
+
+    
+
+
 
         private string ParseFiasCode(List<addrob30> query)
         {
@@ -311,11 +321,17 @@ namespace FiasView.Operation.WorkWithExcel
             } else { _fiasCode = "фиас код не обнаружен!";}
             return _fiasCode;
         }
-        private string ParseFiasCodeString(List<KeyValuePair<int,addrob30>> query, List<KeyValuePair<int, house30>> query2)
+        private string ParseFiasCodeString(List<KeyValuePair<int,addrob30>> query, Dictionary<int, house30> query2)
         {
             _fiasCode = string.Empty;
             string aoguid = string.Empty;
-
+            var _addr = query.Where(q => q.Value.AOLEVEL == 7).FirstOrDefault();
+            aoguid = _addr.Value.AOGUID;
+            var _house_30 = query2.Where(q => q.Value.AOGUID == aoguid && q.Value.HOUSENUM == _house).ToList();
+            if (_house_30.Count() != 0)
+            {
+                _fiasCode = _house_30[0].Value.HOUSEGUID;
+            }
 
             return _fiasCode;
         }

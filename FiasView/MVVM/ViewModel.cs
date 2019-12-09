@@ -1,15 +1,19 @@
-﻿using System;
+﻿using FiasView.Operation;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace FiasView.MVVM
 {
+    
     public class ViewModel : INotifyPropertyChanged
     {
+        LoadAllTable lat;
         private int _progBarLoadDB;
         private int _progBarMaxValue;
         private string _progBarTextDB;
@@ -57,5 +61,14 @@ namespace FiasView.MVVM
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        async public void LoadStartUp(ViewModel vm)
+        {
+            lat = new LoadAllTable();
+            await Task.Run(new Action(() =>
+            {
+                lat.LoadAllTables(vm);
+            }));
+        }
     }
 }
