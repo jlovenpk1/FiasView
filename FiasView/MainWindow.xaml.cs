@@ -147,7 +147,7 @@ namespace FiasView
                         dts = new DBFtoSQL();
                     db.Database.Delete();
                     db.Database.Create();
-                        dts.GetSQLData();
+                    dts.GetSQLData();
                     }
                 }
         }
@@ -327,8 +327,7 @@ namespace FiasView
         {
 
         }
-        private SolidColorBrush hb = new SolidColorBrush(Colors.Orange);
-        private SolidColorBrush nb = new SolidColorBrush(Colors.White);
+
         private void _dataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             int i = e.Row.GetIndex();
