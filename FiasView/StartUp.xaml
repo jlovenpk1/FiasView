@@ -4,12 +4,22 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:FiasView.MVVM"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:local="clr-namespace:FiasView"
         mc:Ignorable="d"
-        Title="StartUp" Height="293.698" Width="239.076" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen">
-    <Grid>
-        <Image Height="273" VerticalAlignment="Top" Source="img/logotip01.jpg" Margin="0,0,4,0"/>
-        <Label  Name ="_infoLoad" Content="{Binding ProgBarTextDB}" Margin="10,234,10,0" Height="39" VerticalAlignment="Top"/>
+        Title="StartUp" Height="211.613" Width="166.332" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen" Visibility="{Binding isVisible, Mode=TwoWay}" ResizeMode="NoResize" Background="White" Foreground="{x:Null}">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding WindowsLoad}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Window.DataContext>
+        <viewmodels:ViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="0,0,2,0">
+        <Image Source="img/logotip01.jpg" Margin="0,0,0,50" HorizontalAlignment="Left" Width="164"/>
+        <Label  Name ="_infoLoad" Content="{Binding ProgBarTextDB}" Margin="10,162,9,0" Height="40" Width="145" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

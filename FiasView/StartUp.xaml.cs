@@ -22,13 +22,9 @@ namespace FiasView
     /// </summary>
     public partial class StartUp : Window
     {
-        ViewModel vm;
          public StartUp()
         {
             InitializeComponent();
-            vm = new ViewModel();
-            vm.LoadStartUp(vm);
-            DataContext = vm;
         }
     }
 }

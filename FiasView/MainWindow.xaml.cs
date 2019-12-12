@@ -56,6 +56,7 @@ namespace FiasView
             vm = new ViewModel();
             _data = new DataTable();
             _dataGrid.CanUserAddRows = false;
+            this.DataContext = vm;
 
         }
 
@@ -80,6 +81,7 @@ namespace FiasView
             _selectColumn_Closed();
             _fileOpen.Reset();
             _excelWork = new LoadExcelToGrid();
+            _data.Clear();
             await Task.Run(new Action(() =>
             {
                 _progress.Dispatcher.BeginInvoke(new Action(delegate 
@@ -102,22 +104,6 @@ namespace FiasView
         {
             _firstColumn = _selectColumn._adresColumn.Text;
             _secondColumn = _selectColumn._fiadColumn != null ? _secondColumn = _selectColumn._fiadColumn.Text : "";
-        }
-
-        /// <summary>
-        /// DoWork - включить прогресс бар
-        /// </summary>
-        private void DoWork_ProgressBar()
-        {
-            ProgressWork.IsIndeterminate = true;
-        }
-
-        /// <summary>
-        /// StopWork - выключить прогресс бар
-        /// </summary>
-        private void StopWork_ProgressBar()
-        {
-            ProgressWork.IsIndeterminate = false;
         }
 
         private void DictAutoswitch_Click(object sender, RoutedEventArgs e)
@@ -155,11 +141,11 @@ namespace FiasView
 
         async void _start_Click(object sender, RoutedEventArgs e)
         {
-
+            
             _data.Dispose();
             _data = new DataTable();
             this.Hide();
-            await Task.Run(new Action(() => 
+            await Task.Run(new Action(() =>
             {
                 _progress.Dispatcher.BeginInvoke(new Action(delegate
                 {
@@ -171,6 +157,7 @@ namespace FiasView
             this.Show();
             _progress.Hide();
             _DGWithFiasCode = true;
+            _oldData = _data;
             _dataGrid.ItemsSource = _data.DefaultView;
             _dataGrid.Items.Refresh();
             #region Для тестов с персингом адреса

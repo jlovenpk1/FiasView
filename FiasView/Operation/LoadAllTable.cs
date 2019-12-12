@@ -13,12 +13,10 @@ namespace FiasView.Operation
     class LoadAllTable
     {
         Model1 _db;
-        StartUp _start;
         public Dictionary<int, addrob30> _cacheAdrr;
         public Dictionary<int, house30> _cacheHouse;
         public void LoadAllTables(ViewModel vm)
         {
-
             _db = new Model1();
             _db.Database.CommandTimeout = 300;
             _cacheAdrr = new Dictionary<int, addrob30>();
@@ -29,7 +27,6 @@ namespace FiasView.Operation
             foreach (addrob30 x in _addr)
             {
                 index++;
-                vm.ProgBarTextDB = "Загружаю ADDROB30: " + index + " из " + _addr.Count;
                 _cacheAdrr.Add(index, x);
             }
             vm.ProgBarTextDB = "Выгружаю HOUSE30....";
@@ -38,10 +35,9 @@ namespace FiasView.Operation
             foreach (house30 h in _house30)
             {
                 index++;
-                vm.ProgBarTextDB = "Загружаю HOUSE30: " + index + " из " + _house30.Count;
                 _cacheHouse.Add(index, h);
             }
-            MessageBox.Show("Готово");
+
         }
     }
 }
