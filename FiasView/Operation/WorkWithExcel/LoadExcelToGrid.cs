@@ -316,23 +316,15 @@ namespace FiasView.Operation.WorkWithExcel
                 vm.ProgBarTextDB = "Загруженно: " + index + " из " + _addr.Count;
                 index++;
                 var key = h.HOUSENUM == string.Empty ? new KeyHouse(h.AOGUID, "Пустота"+index.ToString()) : new KeyHouse(h.AOGUID, h.HOUSENUM);
-                _cacheHouse.Add(key, h);
+                if(_cacheHouse.ContainsKey(key))
+                {
+                    if(_cacheHouse[key].UPDATEDATE < h.UPDATEDATE)
+                    {
+                        _cacheHouse.Remove(key);
+                        _cacheHouse.Add(key, h);
+                    }
+                } else { _cacheHouse.Add(key, h); }
             }
-            //for (int i = 0; i < _data.Rows.Count; i++)
-            //{
-
-            //    _street = _data.Rows[i][Columns._street].ToString();
-            //    _house = _data.Rows[i][Columns._house].ToString();
-            //    var query = _db.addrob30.Where(q => q.OFFNAME == _street).ToList();
-            //    var result = query.Count > 0 ? ParseFiasCode(query) : "Фиас Код не обнаружен!";
-            //    _data.Rows[i][Columns._fiasCode] = result;
-            //    vm.ProgBarMaxValue = _data.Rows.Count;
-            //    vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
-            //    vm.ProgBarLoadDB = i;
-            //    vm.ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
-            //    //_progress.Dispatcher.BeginInvoke(new Action(() => { _progress._progbar.DataContext = vm; }));
-            //}
-
             for (int i = 0; i < _data.Rows.Count; i++)
             {
                 int x = 0;
@@ -381,6 +373,7 @@ namespace FiasView.Operation.WorkWithExcel
             } else { _fiasCode = _checkFiasColumn; }
             return _fiasCode;
         }
+
         private string ParseFiasCodeString(List<KeyValuePair<int, addrob30>> query, Dictionary<KeyHouse, house30> query2)
         {
             
@@ -391,21 +384,12 @@ namespace FiasView.Operation.WorkWithExcel
                 var _addr = query.Where(q => q.Value.AOLEVEL == 7).OrderBy(x => x.Value.UPDATEDATE).Last();
                 aoguid = _addr.Value.AOGUID;
                 var key = new KeyHouse(aoguid, _house);
-                var result = query2[key];
-                if (query2.Where(q => q.Value.AOGUID == aoguid && q.Value.HOUSENUM == _house).Count() != 0)
+                if (query2.ContainsKey(key))
                 {
-                    var _house_30 = query2.Where(q => q.Value.AOGUID == aoguid && q.Value.HOUSENUM == _house).OrderBy(x => x.Value.UPDATEDATE).Last();
-                    if (_house_30.Value != null)
-                    {
-                        var checkNum = _house.GetHashCode().Equals(_house_30.Key._houseNum.GetHashCode());
-                        var checkFias = aoguid.GetHashCode().Equals(_house_30.Key._aoguid.GetHashCode());
-                        var test = key.Equals(_house_30.Key);
-                        _fiasCode = _house_30.Value.HOUSEGUID;
-                    }
-                    else { _fiasCode = _checkFiasColumn; }
-                    } else { _fiasCode = _checkFiasColumn; }
-
+                    _fiasCode = query2[key].HOUSEGUID;
                 } else { _fiasCode = _checkFiasColumn; }
+
+            } else { _fiasCode = _checkFiasColumn; }
 
                 return _fiasCode;
             }
