@@ -141,7 +141,7 @@ namespace FiasView
 
         async void _start_Click(object sender, RoutedEventArgs e)
         {
-            
+
             _data.Dispose();
             _data = new DataTable();
             this.Hide();
@@ -325,4 +325,5 @@ namespace FiasView
             
         }
     }
+
 }

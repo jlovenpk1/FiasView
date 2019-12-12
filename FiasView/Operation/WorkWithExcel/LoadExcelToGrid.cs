@@ -21,7 +21,7 @@ namespace FiasView.Operation.WorkWithExcel
         private Model1 _db;
         private MainWindow mv;
         Dictionary<int, addrob30> _cacheAdrr;
-        Dictionary<int, house30> _cacheHouse;
+        Dictionary<KeyHouse, house30> _cacheHouse;
         private string _firstColumn = string.Empty;
         private string _secondColumn = string.Empty;
         private string[] _adress;
@@ -59,7 +59,7 @@ namespace FiasView.Operation.WorkWithExcel
         /// <returns></returns>
         private DataTable AdresColumnOnly(IXLWorksheet ws)
         {
-            
+
             // 414040, Астраханская обл, Астрахань г, Анри Барбюса ул, дом № 30, помещение 019
             _data = ws.RangeUsed().AsTable().AsNativeDataTable();
             for (int i = 0; i < _data.Columns.Count; i++)
@@ -77,7 +77,7 @@ namespace FiasView.Operation.WorkWithExcel
             _data.Columns.Add(Columns._fiasCode);
             for (int i = 0; i < _data.Rows.Count; i++)
             {
-               _adress = _data.Rows[i][_firstColumn].ToString().Split(new char[] {','});
+                _adress = _data.Rows[i][_firstColumn].ToString().Split(new char[] { ',' });
                 ParsingAdress(_data.Rows[i][_firstColumn].ToString());
                 _data.Rows[i][Columns._city] = _city;
                 _data.Rows[i][Columns._street] = _street;
@@ -139,7 +139,7 @@ namespace FiasView.Operation.WorkWithExcel
                 "дом.", "д.", "дом", "д",
                 " дом.", "  д."," д.", " дом", " д",
                 "дом. ", "д. ", "дом ","  д.", "д ", "участок", " участок", "участок ", " участок ", "  участок "};
-            List<string> corpus = new List<string>() { " - корп. ", "- корп.", "-корп.", " корп.,", "корп., ", "корп, "," корп,", " корп. ", " корп." };
+            List<string> corpus = new List<string>() { " - корп. ", "- корп.", "-корп.", " корп.,", "корп., ", "корп, ", " корп,", " корп. ", " корп." };
             #region Магия Индии и Китая в одном флаконе
             try
             {
@@ -196,7 +196,7 @@ namespace FiasView.Operation.WorkWithExcel
                             var posStart = _street.IndexOf(" ");
                             _street = posStart < 0 ? _street : _street.Remove(posStart, 1);
                             var posLast = _street.LastIndexOf(" ");
-                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 || posLast > 0 && _pAdress[i].Length > 8 ? _street :_street.Remove(posLast, 1);
+                            _street = posLast < 0 || posLast < 0 && _pAdress[i].Length > 15 || posLast > 0 && _pAdress[i].Length > 8 ? _street : _street.Remove(posLast, 1);
                             if (_street.IndexOf("/") > 0)
                             {
                                 _street = _street.IndexOf("/") > 0 ? _street.Remove(_street.IndexOf("/"), _street.Length - _street.IndexOf("/")) : _street;
@@ -237,7 +237,7 @@ namespace FiasView.Operation.WorkWithExcel
                             var posLast = _house.LastIndexOf(" ");
                             _house = posLast < 0 ? _house : _house.Remove(posLast, 1);
                             break;
-                        } 
+                        }
                     }
 
                     for (int x = 0; x < corpus.Count; x++)
@@ -274,7 +274,7 @@ namespace FiasView.Operation.WorkWithExcel
                 }
                 //MessageBox.Show(test);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Ошибка: " + ex);
             }
@@ -299,13 +299,12 @@ namespace FiasView.Operation.WorkWithExcel
             }
             _db.Database.CommandTimeout = 300;
             _cacheAdrr = new Dictionary<int, addrob30>();
-            _cacheHouse = new Dictionary<int, house30>();
+            _cacheHouse = new Dictionary<KeyHouse, house30>();
             List<addrob30> _addr = _db.addrob30.ToList();
             int index = 0;
             vm.ProgBarTextDB = "Ожидайте загружаю Улицы";
             foreach (addrob30 x in _addr)
             {
-                
                 index++;
                 _cacheAdrr.Add(index, x);
             }
@@ -316,7 +315,8 @@ namespace FiasView.Operation.WorkWithExcel
             {
                 vm.ProgBarTextDB = "Загруженно: " + index + " из " + _addr.Count;
                 index++;
-                _cacheHouse.Add(index, h);
+                var key = h.HOUSENUM == string.Empty ? new KeyHouse(h.AOGUID, "Пустота"+index.ToString()) : new KeyHouse(h.AOGUID, h.HOUSENUM);
+                _cacheHouse.Add(key, h);
             }
             //for (int i = 0; i < _data.Rows.Count; i++)
             //{
@@ -334,7 +334,7 @@ namespace FiasView.Operation.WorkWithExcel
             //}
 
             for (int i = 0; i < _data.Rows.Count; i++)
-          {
+            {
                 int x = 0;
                 _street = _data.Rows[i][Columns._street].ToString();
                 _house = _data.Rows[i][Columns._house].ToString();
@@ -375,34 +375,70 @@ namespace FiasView.Operation.WorkWithExcel
             {
                 foreach (house30 _hs in _query)
                 {
-                        _fiasCode = _hs.HOUSEID;
-                        break;
+                    _fiasCode = _hs.HOUSEID;
+                    break;
                 }
             } else { _fiasCode = _checkFiasColumn; }
             return _fiasCode;
         }
-        private string ParseFiasCodeString(List<KeyValuePair<int,addrob30>> query, Dictionary<int, house30> query2)
+        private string ParseFiasCodeString(List<KeyValuePair<int, addrob30>> query, Dictionary<KeyHouse, house30> query2)
         {
+            
             _fiasCode = string.Empty;
             string aoguid = string.Empty;
             if (query.Where(q => q.Value.AOLEVEL == 7).Count() != 0)
             {
                 var _addr = query.Where(q => q.Value.AOLEVEL == 7).OrderBy(x => x.Value.UPDATEDATE).Last();
                 aoguid = _addr.Value.AOGUID;
+                var key = new KeyHouse(aoguid, _house);
+                var result = query2[key];
                 if (query2.Where(q => q.Value.AOGUID == aoguid && q.Value.HOUSENUM == _house).Count() != 0)
                 {
-                    var xx = query2.Where(q => q.Value.AOGUID == aoguid && q.Value.HOUSENUM == _house);
                     var _house_30 = query2.Where(q => q.Value.AOGUID == aoguid && q.Value.HOUSENUM == _house).OrderBy(x => x.Value.UPDATEDATE).Last();
                     if (_house_30.Value != null)
                     {
+                        var checkNum = _house.GetHashCode().Equals(_house_30.Key._houseNum.GetHashCode());
+                        var checkFias = aoguid.GetHashCode().Equals(_house_30.Key._aoguid.GetHashCode());
+                        var test = key.Equals(_house_30.Key);
                         _fiasCode = _house_30.Value.HOUSEGUID;
                     }
                     else { _fiasCode = _checkFiasColumn; }
-                } else { _fiasCode = _checkFiasColumn; }
-                
-            } else { _fiasCode = _checkFiasColumn; }
+                    } else { _fiasCode = _checkFiasColumn; }
 
-            return _fiasCode;
+                } else { _fiasCode = _checkFiasColumn; }
+
+                return _fiasCode;
+            }
+        }
+
+    class KeyHouse
+    {
+        public string _aoguid { get; private set; }
+        public string _houseNum { get; private set; }
+        public KeyHouse(string AOGUID, string HouseNUM)
+        {
+            this._aoguid = AOGUID;
+            this._houseNum = HouseNUM;
+        }
+        public override bool Equals(object obj)
+        {
+            var typedObj = obj as KeyHouse;
+
+            var result = typedObj != null;
+
+            if (result)
+            {
+                result = typedObj._aoguid.Equals(_aoguid) && typedObj._houseNum.Equals(_houseNum);
+            }
+
+            return result;
+        }
+        public override int GetHashCode()
+        {
+            var result = _aoguid.GetHashCode() ^ _houseNum.GetHashCode();
+
+            return result;
         }
     }
 }
+
