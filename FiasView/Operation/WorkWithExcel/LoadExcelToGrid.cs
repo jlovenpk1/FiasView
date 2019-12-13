@@ -18,6 +18,7 @@ namespace FiasView.Operation.WorkWithExcel
     {
         private const string _checkFiasColumn = "Фиас Код не обнаружен!";
         private const string _editAdress = "Проверьте адрес!";
+        private const string _city30 = "Астрахань";
         private DataTable _data;
         private DataTable _newData;
         private Model1 _db;
@@ -141,7 +142,7 @@ namespace FiasView.Operation.WorkWithExcel
                 "дом.", "д.", "дом", "д",
                 " дом.", "  д."," д.", " дом", " д",
                 "дом. ", "д. ", "дом ","  д.", "д ","  д.", "участок", " участок", "участок ", " участок ", "  участок "};
-            List<string> corpus = new List<string>() { " - корп. ", "- корп.", "-корп.", " корп.,", "корп., ", "корп, ", " корп,", " корп. ", " корп." };
+            List<string> corpus = new List<string>() { " - корп. ", "- корп.", "-корп.", " корп.,", "корп., ", "корп, ", " корп,", " корп. ", " корп.", "корпус "," корпус"," корпус "};
             #region Магия Индии и Китая в одном флаконе
             try
             {
@@ -308,7 +309,7 @@ namespace FiasView.Operation.WorkWithExcel
             foreach (addrob30 x in _addr)
             {
                 index++;
-                var key = new KeyAddrob(x.AOID, x.AOGUID, x.OFFNAME);
+                var key = new KeyAddrob(x.AOID, x.AOGUID, x.OFFNAME.ToLower());
                 _cacheAdrr.Add(key, x);
             }
             List<house30> _house30 = _db.house30.ToList();
@@ -318,7 +319,7 @@ namespace FiasView.Operation.WorkWithExcel
             {
                 vm.ProgBarTextDB = "Загруженно: " + index + " из " + _addr.Count;
                 index++;
-                var key = h.HOUSENUM == string.Empty ? new KeyHouse(h.AOGUID, "Пустота"+index.ToString()) : new KeyHouse(h.AOGUID, h.HOUSENUM);
+                var key = h.HOUSENUM == string.Empty ? new KeyHouse(h.AOGUID, "Пустота" + index.ToString(), h.BUILDNUM) : new KeyHouse(h.AOGUID, h.HOUSENUM, h.BUILDNUM);
                 if(_cacheHouse.ContainsKey(key))
                 {
                     if(_cacheHouse[key].UPDATEDATE < h.UPDATEDATE)
@@ -333,6 +334,7 @@ namespace FiasView.Operation.WorkWithExcel
                 int x = 0;
                 _street = _data.Rows[i][Columns._street].ToString();
                 _house = _data.Rows[i][Columns._house].ToString();
+                _corpus = _data.Rows[i][Columns._corpus].ToString();
                 if (_street == _editAdress || _street == string.Empty && _house == string.Empty || _street != null && _house == string.Empty) { _data.Rows[i][Columns._fiasCode] = _checkFiasColumn; }
                 else
                 {
@@ -381,6 +383,7 @@ namespace FiasView.Operation.WorkWithExcel
         {
             List<addrob30> _newAdrrob = new List<addrob30>();
             _fiasCode = string.Empty;
+            _street = _street.ToLower();
             string _aoid = string.Empty;
             string _aoguid = string.Empty;
             KeyAddrob keyA = new KeyAddrob("", "", _street);
@@ -403,8 +406,8 @@ namespace FiasView.Operation.WorkWithExcel
                 {
                     foreach (var p in _checkStreet)
                     {
-                        var _checkAOLevel = query[p];
-                        if (_checkAOLevel.AOLEVEL == 4)
+                        var _checkAOLvLandCity = query[p];
+                        if (_checkAOLvLandCity.AOLEVEL == 4 && _checkAOLvLandCity.OFFNAME == _city30)
                         {
                             keyA = new KeyAddrob(c.AOID, c.AOGUID, _street);
                             break;
@@ -412,13 +415,17 @@ namespace FiasView.Operation.WorkWithExcel
                     }
                 } else { break; }
             }
+            /* Проблема в том, что бывают ситуации когда AOLEVEL = 4 и так же OFFNAME == Астрахань, но разница между двумя улицами в том, что на одной есть дом 9, а у другого нет. 
+             Беда ли эта самой ФИАС или мое распиздяйство, я не знаю, но по всей видимости нужно из KeyA сделать массив с поподаниями и потом уже искать хату. 
+             */
             if (query.ContainsKey(keyA))
             {
                 var _getStreet = query[keyA];
                 _aoguid = _getStreet.AOGUID;
-                var key = new KeyHouse(_aoguid, _house);
+                var key = new KeyHouse(_aoguid, _house, _corpus);
                 if (query2.ContainsKey(key))
                 {
+                    var ss = query2[key];
                     _fiasCode = query2[key].HOUSEGUID;
                 }
                 else { _fiasCode = _checkFiasColumn; }
@@ -431,10 +438,12 @@ namespace FiasView.Operation.WorkWithExcel
     {
         public string _aoguid { get; private set; }
         public string _houseNum { get; private set; }
-        public KeyHouse(string AOGUID, string HouseNUM)
+        public string _corpus { get; private set; }
+        public KeyHouse(string AOGUID, string HouseNUM, string Corpus)
         {
             this._aoguid = AOGUID;
             this._houseNum = HouseNUM;
+            this._corpus = Corpus;
         }
         public override bool Equals(object obj)
         {
@@ -444,14 +453,14 @@ namespace FiasView.Operation.WorkWithExcel
 
             if (result)
             {
-                result = typedObj._aoguid.Equals(_aoguid) && typedObj._houseNum.Equals(_houseNum);
+                result = typedObj._aoguid.Equals(_aoguid) && typedObj._houseNum.Equals(_houseNum) && typedObj._corpus.Equals(_corpus);
             }
 
             return result;
         }
         public override int GetHashCode()
         {
-            var result = _aoguid.GetHashCode() ^ _houseNum.GetHashCode();
+            var result = _aoguid.GetHashCode() ^ _houseNum.GetHashCode() ^ _corpus.GetHashCode();
 
             return result;
         }
