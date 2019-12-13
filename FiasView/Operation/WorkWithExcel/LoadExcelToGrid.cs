@@ -9,6 +9,8 @@ using System.Data;
 using MySql.Data.EntityFramework;
 using System.Windows;
 using FiasView.MVVM;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 namespace FiasView.Operation.WorkWithExcel
 {
@@ -20,7 +22,7 @@ namespace FiasView.Operation.WorkWithExcel
         private DataTable _newData;
         private Model1 _db;
         private MainWindow mv;
-        Dictionary<int, addrob30> _cacheAdrr;
+        Dictionary<KeyAddrob, addrob30> _cacheAdrr;
         Dictionary<KeyHouse, house30> _cacheHouse;
         private string _firstColumn = string.Empty;
         private string _secondColumn = string.Empty;
@@ -138,7 +140,7 @@ namespace FiasView.Operation.WorkWithExcel
             List<string> house = new List<string>() {
                 "дом.", "д.", "дом", "д",
                 " дом.", "  д."," д.", " дом", " д",
-                "дом. ", "д. ", "дом ","  д.", "д ", "участок", " участок", "участок ", " участок ", "  участок "};
+                "дом. ", "д. ", "дом ","  д.", "д ","  д.", "участок", " участок", "участок ", " участок ", "  участок "};
             List<string> corpus = new List<string>() { " - корп. ", "- корп.", "-корп.", " корп.,", "корп., ", "корп, ", " корп,", " корп. ", " корп." };
             #region Магия Индии и Китая в одном флаконе
             try
@@ -292,13 +294,13 @@ namespace FiasView.Operation.WorkWithExcel
             _newData = new DataTable();
             for (int i = 0; i < _data.Rows.Count; i++)
             {
-                if (_data.Rows[i][Columns._street] == _editAdress || _data.Rows[i][Columns._street] == string.Empty || _data.Rows[i][Columns._house] == string.Empty)
+                    if (_data.Rows[i][Columns._street] == _editAdress || _data.Rows[i][Columns._street] == string.Empty || _data.Rows[i][Columns._house] == string.Empty)
                 {
                     _data.Rows[i].Delete();
                 }
             }
             _db.Database.CommandTimeout = 300;
-            _cacheAdrr = new Dictionary<int, addrob30>();
+            _cacheAdrr = new Dictionary<KeyAddrob, addrob30>();
             _cacheHouse = new Dictionary<KeyHouse, house30>();
             List<addrob30> _addr = _db.addrob30.ToList();
             int index = 0;
@@ -306,7 +308,8 @@ namespace FiasView.Operation.WorkWithExcel
             foreach (addrob30 x in _addr)
             {
                 index++;
-                _cacheAdrr.Add(index, x);
+                var key = new KeyAddrob(x.AOID, x.AOGUID, x.OFFNAME);
+                _cacheAdrr.Add(key, x);
             }
             List<house30> _house30 = _db.house30.ToList();
             index = 0;
@@ -333,8 +336,8 @@ namespace FiasView.Operation.WorkWithExcel
                 if (_street == _editAdress || _street == string.Empty && _house == string.Empty || _street != null && _house == string.Empty) { _data.Rows[i][Columns._fiasCode] = _checkFiasColumn; }
                 else
                 {
-                    var query = _cacheAdrr.Where(q => q.Value.OFFNAME == _street).ToList();
-                    var result = query.Count > 0 ? ParseFiasCodeString(query, _cacheHouse) : _checkFiasColumn;
+
+                    var result = ParseFiasCodeString(_cacheAdrr, _cacheHouse);
                     _data.Rows[i][Columns._fiasCode] = result;
                     vm.ProgBarMaxValue = _data.Rows.Count;
                     vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
@@ -374,26 +377,55 @@ namespace FiasView.Operation.WorkWithExcel
             return _fiasCode;
         }
 
-        private string ParseFiasCodeString(List<KeyValuePair<int, addrob30>> query, Dictionary<KeyHouse, house30> query2)
+        private string ParseFiasCodeString(Dictionary<KeyAddrob, addrob30> query, Dictionary<KeyHouse, house30> query2)
         {
-            
+            List<addrob30> _newAdrrob = new List<addrob30>();
             _fiasCode = string.Empty;
-            string aoguid = string.Empty;
-            if (query.Where(q => q.Value.AOLEVEL == 7).Count() != 0)
+            string _aoid = string.Empty;
+            string _aoguid = string.Empty;
+            KeyAddrob keyA = new KeyAddrob("", "", _street);
+            var _addr1 = query.Keys.Where(k => k._offname == _street);
+            foreach (KeyAddrob _key in _addr1)
             {
-                var _addr = query.Where(q => q.Value.AOLEVEL == 7).OrderBy(x => x.Value.UPDATEDATE).Last();
-                aoguid = _addr.Value.AOGUID;
-                var key = new KeyHouse(aoguid, _house);
+                var _checkStatus = query[_key].ACTSTATUS;
+                if (_checkStatus == 1)
+                {
+                    _newAdrrob.Add(query[_key]);
+                }
+                keyA.Clear();
+            }
+            foreach (var c in _newAdrrob)
+            {
+                
+                var _parentGuid = c.PARENTGUID;
+                var _checkStreet = query.Keys.Where(k => k._aoguid == _parentGuid);
+                if (keyA._offname == string.Empty && keyA._aoid == string.Empty && keyA._aoguid == string.Empty)
+                {
+                    foreach (var p in _checkStreet)
+                    {
+                        var _checkAOLevel = query[p];
+                        if (_checkAOLevel.AOLEVEL == 4)
+                        {
+                            keyA = new KeyAddrob(c.AOID, c.AOGUID, _street);
+                            break;
+                        }
+                    }
+                } else { break; }
+            }
+            if (query.ContainsKey(keyA))
+            {
+                var _getStreet = query[keyA];
+                _aoguid = _getStreet.AOGUID;
+                var key = new KeyHouse(_aoguid, _house);
                 if (query2.ContainsKey(key))
                 {
                     _fiasCode = query2[key].HOUSEGUID;
-                } else { _fiasCode = _checkFiasColumn; }
-
+                }
+                else { _fiasCode = _checkFiasColumn; }
             } else { _fiasCode = _checkFiasColumn; }
-
-                return _fiasCode;
+            return _fiasCode;
             }
-        }
+}
 
     class KeyHouse
     {
@@ -423,6 +455,47 @@ namespace FiasView.Operation.WorkWithExcel
 
             return result;
         }
+    }
+
+    class KeyAddrob
+    {
+        public string _aoid { get; private set; }
+        public string _aoguid { get; private set; }
+        public string _offname { get; private set; }
+
+        public KeyAddrob(string aoid, string aoguid, string offName )
+        {
+            this._aoid = aoid;
+            this._aoguid = aoguid;
+            this._offname = offName;
+        }
+        public override bool Equals(object obj)
+        {
+            var typedObj = obj as KeyAddrob;
+
+            var result = typedObj != null;
+
+            if (result)
+            {
+                result = typedObj._aoguid.Equals(_aoguid) && typedObj._aoid.Equals(_aoid) && typedObj._offname.Equals(_offname);
+            }
+
+            return result;
+        }
+        public override int GetHashCode()
+        {
+            var result = _aoguid.GetHashCode() ^ _aoid.GetHashCode() ^ _offname.GetHashCode();
+
+            return result;
+        }
+
+        public void Clear()
+        {
+            this._aoguid = string.Empty;
+            this._aoid = string.Empty;
+            this._offname = string.Empty;
+        }
+
     }
 }
 

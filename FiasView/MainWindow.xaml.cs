@@ -320,7 +320,7 @@ namespace FiasView
         {
             int i = e.Row.GetIndex();
             //var cc = _data.Rows[i]["Улица"]; // для тестов
-            e.Row.Background = _oldData.Rows[i][_street].ToString() == _checkStreet ? e.Row.Background = Brushes.Red : e.Row.Background = Brushes.LightGreen;
+                e.Row.Background = _oldData.Rows[i][_street].ToString() == _checkStreet ? e.Row.Background = Brushes.Red : e.Row.Background = Brushes.LightGreen;
             if (_DGWithFiasCode == true) { e.Row.Background = _oldData.Rows[i][_FiasColumn].ToString() == _checkFiasColumn ? e.Row.Background = Brushes.Red : e.Row.Background = Brushes.LightGreen; }
             
         }
