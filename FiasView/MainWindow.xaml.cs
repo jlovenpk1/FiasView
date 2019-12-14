@@ -158,8 +158,13 @@ namespace FiasView
             _progress.Hide();
             _DGWithFiasCode = true;
             _oldData = _data;
+            var wb = new XLWorkbook();
+            wb.Worksheets.Add(_data);
+            string _name = "Результат проверки.xlsx";
+            wb.SaveAs(_name);
             _dataGrid.ItemsSource = _data.DefaultView;
             _dataGrid.Items.Refresh();
+
             #region Для тестов с персингом адреса
             //string adress = "414038, Астраханская обл, Астрахань г, Грановский пер, дом № 59"; 
             //List<string> adress = new List<string>() {
