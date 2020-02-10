@@ -4,7 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FiasView.UI"
+        xmlns:viewmodels="clrs-namespace:FiasView.MVVM.ViewModels.cs"
         mc:Ignorable="d"
+        DataContext="{StaticResource ViewModel}"
         Title="progressBar" Height="98.404" Width="462.5" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Grid>
         <ProgressBar Value="{Binding ProgBarLoadDB}" Name="_progbar" Maximum="{Binding ProgBarMaxValue}" HorizontalAlignment="Left" Height="20" Margin="10,28,0,0" VerticalAlignment="Top" Width="434"/>

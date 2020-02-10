@@ -21,10 +21,10 @@ namespace FiasView.MVVM
         /// <summary>
         /// Команда - При загрузке Стартового окна 
         /// </summary>
-        public DelegateCommand.DelegateCommand WindowsLoad
-        {
-            get { return new DelegateCommand.DelegateCommand((x => { LoadStartUp(this); })); }
-        }
+        //public DelegateCommand.DelegateCommand WindowsLoad
+        //{
+        //    get { return new DelegateCommand.DelegateCommand((x => { LoadStartUp(this); })); }
+        //}
 
         private int _progBarLoadDB;
         private int _progBarMaxValue;
@@ -92,18 +92,20 @@ namespace FiasView.MVVM
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        async public void LoadStartUp(ViewModel vm)
-        {
-            _lat = new LoadAllTable();
-            _mf = new ManagerForms();
-            
-            await Task.Run(new Action(() =>
-            {
-                _lat.LoadAllTables(vm);
-            }));
-            isVisible = Visibility.Hidden;
-            _mf._mv.Show();
-        }
-      
+        #region Более не используется, но может пригодиться
+        //async public void LoadStartUp(ViewModel vm)
+        //{
+        //    _lat = new LoadAllTable();
+        //    _mf = new ManagerForms();
+
+        //    await Task.Run(new Action(() =>
+        //    {
+        //        _lat.LoadAllTables(vm);
+        //    }));
+        //    isVisible = Visibility.Hidden;
+        //    _mf._mv.Show();
+        //}
+        #endregion
+
     }
 }

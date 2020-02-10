@@ -36,5 +36,10 @@ namespace FiasView.Forms
             } else { this.Close(); }
            
         }
+
+        private void Label_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

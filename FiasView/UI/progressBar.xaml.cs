@@ -21,10 +21,9 @@ namespace FiasView.UI
     public partial class progressBar : Window
     {
 
-        public progressBar(ViewModel vm)
+        public progressBar()
         {
             InitializeComponent();
-            this.DataContext = vm;
         }
     }
 }

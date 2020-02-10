@@ -76,25 +76,28 @@ namespace FiasView
             _excelWork = new LoadExcelToGrid();
             
             _selectColumn = new Window1();
-            _progress = new progressBar(vm);
+            _progress = new progressBar();
             _selectColumn.ShowDialog();
             _selectColumn_Closed();
-            _fileOpen.Reset();
-            _excelWork = new LoadExcelToGrid();
-            _data.Clear();
-            await Task.Run(new Action(() =>
+            if (_firstColumn != "")
             {
-                _progress.Dispatcher.BeginInvoke(new Action(delegate 
+                _fileOpen.Reset();
+                _excelWork = new LoadExcelToGrid();
+                _data.Clear();
+                await Task.Run(new Action(() =>
                 {
-                    _progress.Show();
-                    _progress._progbar.IsIndeterminate = true; }));
+                    _progress.Dispatcher.BeginInvoke(new Action(delegate
+                    {
+                        _progress.Show();
+                        _progress._progbar.IsIndeterminate = true;
+                    }));
                     _data = _excelWork.OpenExcel(_workbook = new XLWorkbook(_path), _firstColumn, _secondColumn);
                 }));
-            _oldData = _data;
-            _dataGrid.ItemsSource = _data.DefaultView;
-            _progress.Hide();
-            
-            
+                _oldData = _data;
+                _dataGrid.ItemsSource = _data.DefaultView;
+                _progress.Hide();
+            }
+            //MySql.Data.MySqlClient.MySqlBulkLoader ld = new MySql.Data.MySqlClient.MySqlBulkLoader();
         }
 
         /// <summary>
