@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace FiasView.MVVM
 {
-    class ManagerForms:Forms
+    class ManagerForms
     {
 
         public void HideWindows()

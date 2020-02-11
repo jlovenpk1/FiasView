@@ -18,9 +18,9 @@ namespace FiasView.Forms
     /// <summary>
     /// Логика взаимодействия для Window1.xaml
     /// </summary>
-    public partial class Window1 : Window
+    public partial class SelectColumns : Window
     {
-        public Window1()
+        public SelectColumns()
         {
             InitializeComponent();
         }
@@ -33,7 +33,7 @@ namespace FiasView.Forms
                 _error.Foreground = new SolidColorBrush(Colors.Red);
                 _error.FontSize = 12;
                 _error.Text = "Обязательное поле для ввода!";
-            } else { this.Close(); }
+            } else {this.Close(); }
            
         }
 

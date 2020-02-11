@@ -122,13 +122,13 @@
     <Compile Include="house30.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="MVVM\DelegateCommand\DelegateCommand.cs" />
-    <Compile Include="MVVM\Forms.cs" />
     <Compile Include="MVVM\ManagerForms.cs" />
     <Compile Include="MVVM\ViewModel.cs" />
     <Compile Include="Operation\LoadAllTable.cs" />
     <Compile Include="Operation\OperationWithDBF\DBFtoSQL.cs" />
     <Compile Include="Operation\OperationWithDBF\Operation.cs" />
     <Compile Include="Operation\WorkWithExcel\LoadExcelToGrid.cs" />
+    <Compile Include="Operation\WorkWithExcel\SelectFile.cs" />
     <Compile Include="room30.cs" />
     <Compile Include="StartUp.xaml.cs">
       <DependentUpon>StartUp.xaml</DependentUpon>
@@ -137,6 +137,9 @@
       <DependentUpon>progressBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="UpdateAdress.cs" />
+    <Compile Include="Window1.xaml.cs">
+      <DependentUpon>Window1.xaml</DependentUpon>
+    </Compile>
     <Page Include="Forms\formFindOneAdress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -165,6 +168,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\progressBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Window1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -204,6 +211,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="img\logotip01.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="img\icons8-документ-50.png" />
+    <Resource Include="img\icons8-обновить-50.png" />
+    <Resource Include="img\icons8-поиск-50.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

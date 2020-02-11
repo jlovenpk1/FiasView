@@ -9,15 +9,19 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using FiasView.MVVM.DelegateCommand;
+using System.Windows.Controls;
+using System.Data;
+using FiasView.Operation.WorkWithExcel;
+using System.Collections.ObjectModel;
+using System.Windows.Media;
+
 namespace FiasView.MVVM
 {
-    
+
     public class ViewModel : INotifyPropertyChanged
     {
-        LoadAllTable _lat;
-        MainWindow _mv;
-        ManagerForms _mf;
-        StartUp _st;
+        SelectFile _sf;
+
         /// <summary>
         /// Команда - При загрузке Стартового окна 
         /// </summary>
@@ -26,8 +30,41 @@ namespace FiasView.MVVM
         //    get { return new DelegateCommand.DelegateCommand((x => { LoadStartUp(this); })); }
         //}
 
+        /// <summary>
+        /// Command View - Вызвать метод FindAdress
+        /// </summary>
+        public DelegateCommand.DelegateCommand _FindAdress
+        {
+            get { return new DelegateCommand.DelegateCommand((x => { FindAdress(); })); }
+        }
+
+        /// <summary>
+        /// Command View - Вызвать метод SelectFile
+        /// </summary>
+        public DelegateCommand.DelegateCommand _SelectFile
+        {
+            get { return new DelegateCommand.DelegateCommand((x => { SelectFile(); })); }
+        }
+
+        /// <summary>
+        /// Command View - вызвать метод CloseButton(object Window) обязательно передавать объект Window
+        /// </summary>
+        public DelegateCommand.DelegateCommand _CloseButton
+        {
+            get { return new DelegateCommand.DelegateCommand((x => { CloseButton(x); })); }
+        }
+
+        /// <summary>
+        /// Command View - вызвать метод LoadRow(object DataGrid) обязательно передавать DataGrid
+        /// </summary>
+        public DelegateCommand.DelegateCommand _LoadRow
+        {
+            get { return new DelegateCommand.DelegateCommand((x => { LoadRow(x); })); }
+        }
+
         private int _progBarLoadDB;
         private int _progBarMaxValue;
+        private DataTable _dataGrid;
         private string _progBarTextDB;
         private string _progBarLoadCount;
         private string _countRows;
@@ -84,6 +121,14 @@ namespace FiasView.MVVM
                 OnPropertyChanged("CountRows");
             }
         }
+        public DataTable DataGrid
+        {
+            get { return _dataGrid; }
+            set {
+                _dataGrid = value;
+                OnPropertyChanged("DataGrid");
+            }
+        }
 
         private void OnPropertyChanged([CallerMemberName] string prop = "")
         {
@@ -107,5 +152,60 @@ namespace FiasView.MVVM
         //}
         #endregion
 
+        /// <summary>
+        /// Command View - метод для поиска ФИАС кода по адресу 
+        /// </summary>
+        private void FindAdress()
+        {
+            MessageBox.Show("TEST");
+        }
+
+        /// <summary>
+        /// Command View - метод выбора файла для загрузки
+        /// </summary>
+        private async void SelectFile()
+        {
+            _sf = new SelectFile();
+            DataTable ss = await _sf.FileLoad();
+            DataGrid = ss;
+        }
+
+        /// <summary>
+        /// Command View - закрыть программу
+        /// </summary>
+        /// <param name="x">Windows type object</param>
+        private void CloseButton(object x)
+        {
+            var mv = x as MainWindow;
+            mv.Close();
+        }
+
+        /// <summary>
+        /// Command View -  метод вызова загрузки строк DataGrid
+        /// </summary>
+        /// <param name="rows">DataGrid type Object</param>
+        private void LoadRow(object rows)
+        {
+            var row = rows as DataGrid;
+            row.LoadingRow += LoadingRows;
+        }
+
+        /// <summary>
+        /// Загрузка DataGrid
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">DataGridRowEventArgs</param>
+        private void LoadingRows(object sender, DataGridRowEventArgs e)
+        {
+            const string _street = "Улица";
+            const string _checkStreet = "Проверьте адрес!";
+            const string _FiasColumn = "Фиас индетификатор";
+            const string _checkFiasColumn = "Фиас Код не обнаружен!";
+            bool _DGWithFiasCode = false;
+            var i = e.Row.GetIndex() - 1;
+            i = i < 0 ? 0 : 0;
+            e.Row.Background = DataGrid.Rows[i][_street].ToString() == _checkStreet ? e.Row.Background = Brushes.Red : e.Row.Background = Brushes.LightGreen;
+            if (_DGWithFiasCode == true) { e.Row.Background = DataGrid.Rows[i][_FiasColumn].ToString() == _checkFiasColumn ? e.Row.Background = Brushes.Red : e.Row.Background = Brushes.LightGreen; }
+        }
     }
 }
