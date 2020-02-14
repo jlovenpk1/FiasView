@@ -11,23 +11,27 @@ using System.Windows;
 using FiasView.MVVM;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
+using System.Threading;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace FiasView.Operation.WorkWithExcel
 {
-    class LoadExcelToGrid
+    class WorkWithAllAddress
     {
         private const string _checkFiasColumn = "Фиас Код не обнаружен!"; // для проверки 
         private const string _editAdress = "Проверьте адрес!"; // для оповещения
         private const string _city30 = "Астрахань"; // для проверки
         private DataTable _data; // хранится таблица 
         private Model1 _db; // База
+        private ViewModel vm;
         private MainWindow mv; // главное окно 
         private Dictionary<KeyAddrob, addrob30> _cacheAdrr; // кэш Адресов
         private Dictionary<KeyHouse, house30> _cacheHouse; // кэш домов
         private Dictionary<int, KeyAddrob> _keyDict; // Словарь для адресов
         private KeyAddrob keyA; // Ключи адресов
-        private List<house30> _house30; // требуются для формирования кэш-таблицы
-        private List<addrob30> _addr; // требуется для формирования кэш-таблицы
+        public List<house30> _house30; // требуются для формирования кэш-таблицы
+        public List<addrob30> _addr; // требуется для формирования кэш-таблицы
         private string _firstColumn = string.Empty; // первая колонка
         private string _secondColumn = string.Empty; // вторая колонка
         private string[] _adress; // адреса 
@@ -39,6 +43,87 @@ namespace FiasView.Operation.WorkWithExcel
         private string _house = string.Empty;
         private string _fiasCode = string.Empty;
         private string _corpus = string.Empty;
+
+        #region Параметры и реализация события, для передачи данных в ViewModel
+        private int _progBarValue;
+        private int _progBarMaxValue;
+        private string _progBarTextDB;
+        private string _progBarLoadCount;
+        private string _countRows;
+        /// <summary>
+        /// Значение Value у ProgressBar
+        /// </summary>
+        public int ProgBarValue
+        {
+            get { return _progBarValue; }
+            set
+            {
+                _progBarValue = value;
+                OnParametrChange("ProgBarValue");
+            }
+        }
+        /// <summary>
+        /// Максимальное значение ProgressBar {MaxValue}
+        /// </summary>
+        public int ProgBarMaxValue
+        {
+            get { return _progBarMaxValue; }
+            set
+            {
+                _progBarMaxValue = value;
+                OnParametrChange("ProgBarMaxValue");
+            }
+        }
+        /// <summary>
+        /// TextBox текст на ProgressBar
+        /// </summary>
+        public string ProgBarTextDB
+        {
+            get { return _progBarTextDB; }
+            set
+            {
+                _progBarTextDB = value;
+                OnParametrChange("ProgBarTextDB");
+            }
+        }
+        /// <summary>
+        /// Label, отображает значение в стиле: Загружено 0/1000;
+        /// </summary>
+        public string ProgBarLoadCount
+        {
+            get { return _progBarLoadCount; }
+            set
+            {
+                _progBarLoadCount = value;
+                OnParametrChange("ProgBarLoadCount");
+            }
+        }
+        /// <summary>
+        /// Отображает количество строк, которым было присвоен FIAS CODE
+        /// </summary>
+        public string CountRows
+        {
+            get { return _countRows; }
+            set
+            {
+                _countRows = value;
+                OnParametrChange("CountRows");
+            }
+        }
+        /// <summary>
+        /// Событие для передачи информации по изменению переменной. Способ подписывания на событие: Model.ParametrChange += OnPropertyChanged;
+        /// </summary>
+        public event Action<string> ParametrChange; 
+        /// <summary>
+        /// Вызываемый метод для события
+        /// </summary>
+        /// <param name="prop">имя перменной</param>
+        private void OnParametrChange(string param = "")
+        {
+            ParametrChange?.Invoke(param);
+        }
+        #endregion
+
         /// <summary>
         /// Название колонок для формирования DataGridView
         /// </summary>
@@ -137,7 +222,7 @@ namespace FiasView.Operation.WorkWithExcel
             List<string> street = new List<string>() {
                 " улица", " ул", " ул.", " улица.", " у.", " пер", " пер.", " переулок", " проспект"," пр-кт"," проспект."," п-к"," площадь"," пл"," пл."," проезд"," п-д",
                 "улица ", "ул ", "у ", "ул. ", "улица. ", " у. ", "пер ", "пер. ", "переулок ","проспект ","пр-кт ","проспект. ","п-к ","площадь ","пл ","пл. ","проезд ","п-д ",
-                "улица", "ул", "у", "ул.", "улица.", "у.", "пер", "переулок", "пер.","проспект","пр-кт","проспект.","п-к","площадь","пл","пл.","проезд","п-д","снт."," снт","снт. ", "снт ","снт, "," снт,"};
+                "улица", "ул", "у", " ул. ", "улица.", "у.", "пер", "переулок", "пер.","проспект","пр-кт","проспект.","п-к","площадь","пл","пл.","проезд","п-д","снт."," снт","снт. ", "снт ","снт, "," снт,"};
             List<string> house = new List<string>() {
                 "дом.", "д.", "дом", "д",
                 " дом.", "  д."," д.", " дом", " д",
@@ -286,17 +371,12 @@ namespace FiasView.Operation.WorkWithExcel
         /// <summary>
         /// Получение Фиас Кода с записью его в DataTable Column = "Фиас Индетификатор"
         /// </summary>
-        /// <param name="vm">ViewModel</param>
         /// <returns></returns>
-        public DataTable GetFiasCode(ViewModel vm)
+        public DataTable GetFiasCode(DataTable _dataViewModel)
         {
-            _db = new Model1();
+            List<string> _progInfo = new List<string>();
+            _data = _dataViewModel;
             DeleteEmptyRow();
-            _db.Database.CommandTimeout = 300;
-            _cacheAdrr = new Dictionary<KeyAddrob, addrob30>();
-            _cacheHouse = new Dictionary<KeyHouse, house30>();
-            LoadCacheAdrr(vm);
-            LoadCacheHouse(vm);
             for (int i = 0; i < _data.Rows.Count; i++)
             {
                 int x = 0;
@@ -312,18 +392,32 @@ namespace FiasView.Operation.WorkWithExcel
 
                     var result = ParseFiasCodeString(_cacheAdrr, _cacheHouse);
                     _data.Rows[i][Columns._fiasCode] = result;
-                    vm.ProgBarMaxValue = _data.Rows.Count;
-                    vm.ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
-                    vm.ProgBarLoadDB = i;
-                    vm.ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
+                    ProgBarMaxValue = _data.Rows.Count;
+                    ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
+                    ProgBarValue = i;
+                    ProgBarLoadCount = "Прочитано: " + i + " из " + _data.Rows.Count;
                     if (_fiasCode != _checkFiasColumn || _fiasCode != string.Empty && _house != string.Empty)
                     {
                         x++;
-                        vm.CountRows = "Поподания: " + x + " из " + _data.Rows.Count;
-                    }
+                        CountRows = "Поподания: " + x.ToString() + " из " + _data.Rows.Count.ToString();
+                    }  
                 }
             }
             return _data;
+        }
+        /// <summary>
+        /// Получение Фиас Кода одного адреса
+        /// </summary>
+        /// <returns></returns>
+        public string GetFiasCode(string _address)
+        {
+            ParsingAdress(_address);
+            var result = ParseFiasCodeString(_cacheAdrr, _cacheHouse);
+            ProgBarMaxValue = 1;
+            ProgBarTextDB = "Фиас код: " + result + "; Улица: " + _street;
+            ProgBarValue = 1;
+            
+            return result;
         }
         /// <summary>
         /// Удаление пустых строк и строк где строка адреса не распарсилась
@@ -342,30 +436,41 @@ namespace FiasView.Operation.WorkWithExcel
         /// Загрузка кэш-данных улицы
         /// </summary>
         /// <param name="vm"></param>
-        private void LoadCacheAdrr(ViewModel vm)
+        public void LoadCacheAdrr()
         {
+            ProgBarTextDB = "Загружаю Улицы, ожидайте!";
+            _db = new Model1();
+            _db.Database.CommandTimeout = 300;
+            _cacheAdrr = new Dictionary<KeyAddrob, addrob30>();
+            _addr = new List<addrob30>();
             _addr = _db.addrob30.ToList();
+            int countRow = _addr.Count;
             int _index = 0;
-            vm.ProgBarTextDB = "Ожидайте загружаю Улицы";
+            ProgBarMaxValue = countRow;
             foreach (addrob30 x in _addr)
             {
                 _index++;
                 var key = new KeyAddrob(x.AOID, x.AOGUID, x.OFFNAME.ToLower());
                 _cacheAdrr.Add(key, x);
+                ProgBarTextDB = "Загруженно улиц: " + _index.ToString();
+                ProgBarValue = _index;
             }
         }
         /// <summary>
         /// Загрузка кэш-данных номера дома
         /// </summary>
         /// <param name="vm"></param>
-        private void LoadCacheHouse(ViewModel vm)
+        public void LoadCacheHouse()
         {
+            ProgBarTextDB = "Загружаю Дома, ожидайте!";
             int _index = 0;
+            _cacheHouse = new Dictionary<KeyHouse, house30>();
+            _house30 = new List<house30>();
             _house30 = _db.house30.ToList();
-            vm.ProgBarMaxValue = _addr.Count;
+            int countRows = _house30.Count;
+            ProgBarMaxValue = countRows;
             foreach (house30 h in _house30)
             {
-                vm.ProgBarTextDB = "Загруженно: " + _index + " из " + _addr.Count;
                 _index++;
                 var key = h.HOUSENUM == string.Empty ? new KeyHouse(h.AOGUID, "Пустота" + _index.ToString(), h.BUILDNUM) : new KeyHouse(h.AOGUID, h.HOUSENUM, h.BUILDNUM);
                 if (_cacheHouse.ContainsKey(key))
@@ -377,15 +482,83 @@ namespace FiasView.Operation.WorkWithExcel
                     }
                 }
                 else { _cacheHouse.Add(key, h); }
+
+                ProgBarTextDB = "Загуженно домов: " + _index.ToString();
+                ProgBarValue = _index;
             }
         }
         /// <summary>
-        /// Поиск FIAS кода
+        /// Поиск FIAS кода массовый
         /// </summary>
         /// <param name="query">кэш улицы</param>
         /// <param name="query2">кэш дома</param>
         /// <returns></returns>
         private string ParseFiasCodeString(Dictionary<KeyAddrob, addrob30> query, Dictionary<KeyHouse, house30> query2)
+        {
+            List<addrob30> _newAdrrob = new List<addrob30>();
+            _fiasCode = string.Empty;
+            _street = _street.ToLower();
+            string _aoid = string.Empty;
+            string _aoguid = string.Empty;
+            keyA = new KeyAddrob("", "", _street);
+            _keyDict = new Dictionary<int, KeyAddrob>();
+            var _addr1 = query.Keys.Where(k => k._offname == _street);
+            foreach (KeyAddrob _key in _addr1)
+            {
+                var _checkStatus = query[_key].ACTSTATUS;
+                if (_checkStatus == 1)
+                {
+                    _newAdrrob.Add(query[_key]);
+                }
+                keyA.Clear();
+            }
+            int i = 0;
+            foreach (var c in _newAdrrob)
+            {
+                var _parentGuid = c.PARENTGUID;
+                var _checkStreet = query.Keys.Where(k => k._aoguid == _parentGuid);
+                if (keyA._offname == string.Empty && keyA._aoid == string.Empty && keyA._aoguid == string.Empty)
+                {
+                    foreach (var p in _checkStreet) // what is this huynya
+                    {
+                        var _checkAOLvLandCity = query[p];
+                        if (_checkAOLvLandCity.AOLEVEL == 4 && _checkAOLvLandCity.OFFNAME == _city30)
+                        {
+                            _keyDict.Add(i,new KeyAddrob(c.AOID,c.AOGUID, _street));
+                            i++;
+                        }
+                    }
+                } else { break; }
+            }
+            /*Проблема в том, что бывают ситуации когда AOLEVEL = 4 и так же OFFNAME == Астрахань, но разница между двумя улицами в том, что на одной есть дом 9, а у другого нет. 
+             Беда ли эта самой ФИАС или мое распиздяйство, я не знаю, но по всей видимости нужно из KeyA сделать массив с поподаниями и потом уже искать хату. 
+             */
+             foreach(var key in _keyDict)
+            {
+                if (query.ContainsKey(key.Value))
+                {
+                    var _getStreet = query[key.Value];
+                    _aoguid = _getStreet.AOGUID;
+                    var _key = new KeyHouse(_aoguid, _house, _corpus);
+                    if (query2.ContainsKey(_key))
+                    {
+                        var ss = query2[_key];
+                        _fiasCode = query2[_key].HOUSEGUID;
+                    }
+                    else { _fiasCode = _checkFiasColumn; }
+                }
+                else { _fiasCode = _checkFiasColumn; }
+            }
+            
+            return _fiasCode;
+            }
+        /// <summary>
+        /// Поиск FIAS кода по одному адресу
+        /// </summary>
+        /// <param name="query">кэш улицы</param>
+        /// <param name="query2">кэш дома</param>
+        /// <returns></returns>
+        private string ParseFiasCodeString(Dictionary<KeyAddrob, addrob30> query, Dictionary<KeyHouse, house30> query2, string _address)
         {
             List<addrob30> _newAdrrob = new List<addrob30>();
             _fiasCode = string.Empty;

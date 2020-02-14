@@ -9,7 +9,11 @@
         Name="MainWin"
         DataContext="{StaticResource ViewModel}"
         Title="MainWindow" Height="453.814" Width="800" Background="#FF385E8B" WindowState="Normal" WindowStartupLocation="CenterScreen" WindowStyle="None">
-
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding _Start}" CommandParameter="{Binding ElementName=MainWin}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="9*"/>
@@ -37,16 +41,23 @@
             <RowDefinition Height="77*"/>
 
         </Grid.RowDefinitions>
-        <Canvas Background="#FF3D689B" Margin="0,2,0,0" Grid.ColumnSpan="2"  MouseEnter="ChangeColor" MouseLeave="ResetColor" Grid.Row="7" HorizontalAlignment="Left" Width="117" Height="101" VerticalAlignment="Top">
+        <Canvas Background="#FF3D689B" Margin="0,2,0,0" Grid.ColumnSpan="2"  Grid.Row="7" HorizontalAlignment="Left" Width="117" Height="101" VerticalAlignment="Top">
             <Image Height="78" VerticalAlignment="Top" Source="img/icons8-обновить-50.png" Stretch="Fill" Grid.Column="1" Canvas.Left="23" Canvas.Top="10" Width="82"/>
         </Canvas>
         <!--LoadingRow="_dataGrid_LoadingRow"  MouseEnter="ChangeColor" MouseLeave="ResetColor"-->
-        <DataGrid Name="DataGrids" Focusable="False" ItemsSource="{Binding DataGrid, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  Grid.Column="2" Grid.ColumnSpan="9" Grid.Row="3" Grid.RowSpan="6" Margin="0,2,0,-2">
+        <DataGrid Name="DataGrids" Focusable="False" ItemsSource="{Binding MainGrid}"  Grid.Column="2" Grid.ColumnSpan="9" Grid.Row="3" Grid.RowSpan="6" Margin="0,2,0,-2">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="LoadingRow">
                     <i:InvokeCommandAction Command="{Binding _LoadRow}" CommandParameter="{Binding ElementName=DataGrids}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Начать проверку" Command="{Binding _StartSearch}"/>
+                    <MenuItem Header="Сохранить результат" Command="{Binding _StartSave}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            
         </DataGrid>
         <Label x:Name="count_rows" Content="{Binding CountRows, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Margin="4,0,0,0" Width="200" Height="15" FontSize="20" VerticalAlignment="Top" Grid.ColumnSpan="3" Grid.Column="1" Grid.Row="3"/>
         <Canvas  Margin="2,2,0,0" Grid.ColumnSpan="2" Grid.Row="3" HorizontalAlignment="Left" Width="115" Height="100" VerticalAlignment="Top" Grid.RowSpan="2">
@@ -67,16 +78,24 @@
             </Canvas.Style>
             <Image Height="73" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Source="img/icons8-документ-50.png" Stretch="Fill" Grid.Column="1" Canvas.Left="24" Canvas.Top="10"/>
         </Canvas>
-        <Canvas Background="#FF3D689B" Margin="2,0,0,0" Grid.ColumnSpan="2" MouseEnter="ChangeColor" MouseLeave="ResetColor" Grid.Row="5" HorizontalAlignment="Left" Width="115" Height="104" VerticalAlignment="Top" Grid.RowSpan="2" MouseDown="Canvas_MouseDown">
+        <Canvas Background="#FF3D689B" Margin="2,0,0,0" Grid.ColumnSpan="2" Grid.Row="5" HorizontalAlignment="Left" Width="115" Height="104" VerticalAlignment="Top" Grid.RowSpan="2">
             <Image Height="73" VerticalAlignment="Top" Source="img/icons8-поиск-50.png" Stretch="Fill" Grid.Column="1" Canvas.Left="29" Canvas.Top="10"/>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseUp">
+                    <i:InvokeCommandAction Command="{Binding _FindAdress}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
         </Canvas>
         <Canvas Grid.ColumnSpan="11" Background="#FF385E8B" MouseDown="Drag_Windows">
-            <Label Content="FiasView" FontSize="20" Foreground="White" Background="{x:Null}" Height="35" Canvas.Left="10" Width="94" Canvas.Top="2"/>
-
-
-
+            <Label Content="{Binding CountRows}" FontSize="20" Foreground="White" Background="{x:Null}" Height="35" Canvas.Left="10" Width="94" Canvas.Top="2"/>
         </Canvas>
-        <Label Content="_" FontSize="20" Foreground="White" Background="{x:Null}" Grid.Column="8" RenderTransformOrigin="0.47,0.197"/>
+        <Label Content="_" FontSize="20" Foreground="White" Background="{x:Null}" Grid.Column="8" RenderTransformOrigin="0.47,0.197">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseUp">
+                    <i:InvokeCommandAction Command="{Binding _HideWindow}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Label>
         <Label Content="X" FontSize="20" Foreground="White" Background="{x:Null}" Grid.Column="10">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseUp">
@@ -85,7 +104,13 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </Label>
-        <Label Content="[__]" FontSize="20" Foreground="White" Background="{x:Null}" MouseUp="Label_MouseUp" Grid.Column="6"/>
+        <Label Content="[__]" FontSize="20" Foreground="White" Background="{x:Null}" Grid.Column="6">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseUp">
+                    <i:InvokeCommandAction Command="{Binding _MaxMinWindow}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Label>
 
     </Grid>
 </Window>

@@ -21,7 +21,7 @@ namespace FiasView.Operation
             _db.Database.CommandTimeout = 300;
             _cacheAdrr = new Dictionary<int, addrob30>();
             _cacheHouse = new Dictionary<int, house30>();
-            vm.ProgBarTextDB = "Выгружаю ADDROB30....";
+            //vm.ProgBarTextDB = "Выгружаю ADDROB30....";
             List<addrob30> _addr = _db.addrob30.ToList();
             int index = 0;
             foreach (addrob30 x in _addr)
@@ -29,7 +29,7 @@ namespace FiasView.Operation
                 index++;
                 _cacheAdrr.Add(index, x);
             }
-            vm.ProgBarTextDB = "Выгружаю HOUSE30....";
+            //vm.ProgBarTextDB = "Выгружаю HOUSE30....";
             List<house30> _house30 = _db.house30.ToList();
             index = 0;
             foreach (house30 h in _house30)

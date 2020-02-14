@@ -7,11 +7,11 @@
         xmlns:viewmodels="clrs-namespace:FiasView.MVVM.ViewModels.cs"
         mc:Ignorable="d"
         DataContext="{StaticResource ViewModel}"
-        Title="progressBar" Height="98.404" Width="462.5" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="progressBar" Height="98.404" Width="462.5" WindowState="Normal" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Background="#00000000" Foreground="#00000000">
     <Grid>
-        <ProgressBar Value="{Binding ProgBarLoadDB}" Name="_progbar" Maximum="{Binding ProgBarMaxValue}" HorizontalAlignment="Left" Height="20" Margin="10,28,0,0" VerticalAlignment="Top" Width="434"/>
-        <TextBlock  Name="_progressText" Margin="14,30,13,0" TextWrapping="Wrap" Text="{Binding ProgBarTextDB}" Height="16" VerticalAlignment="Top" TextAlignment="Center"/>
-        <Label Content="{Binding ProgBarLoadCount}" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top"/>
+        <ProgressBar Value="{Binding ProgBarValue}" Name="_progbar" Maximum="{Binding ProgBarMaxValue}" HorizontalAlignment="Left" Height="20" Margin="10,28,0,0" VerticalAlignment="Top" Width="434"/>
+        <TextBlock  Name="_progressText" Margin="14,30,13,0" TextWrapping="Wrap" Text="{Binding ProgBarTextDB}" Height="16" VerticalAlignment="Top" TextAlignment="Center" Foreground="Black"/>
+        <Label Content="{Binding ProgBarLoadCount}" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" Background="#FF1854AA" Foreground="White" Width="434"/>
 
     </Grid>
 </Window>

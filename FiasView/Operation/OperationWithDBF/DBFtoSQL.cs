@@ -16,7 +16,9 @@ using Z.BulkOperations;
 
 namespace FiasView.Operation.OperationWithDBF
 {
-
+    /// <summary>
+    /// DBFtoSQL: Класс отвечает за работу с DBF, что бы перевести базы DBF в MySQL
+    /// </summary>
     class DBFtoSQL
     {
         private OdbcConnection _odbc; // ODBC коннект, сюда мы кинем наш путь подключения
@@ -26,7 +28,6 @@ namespace FiasView.Operation.OperationWithDBF
         private StringBuilder _str;
         private progressBar _progress;
         private Model1 db;
-        private ViewModel mv;
         private List<addrob30> _addrob30;
         private List<house30> _house30;
         private List<room30> _room30;
@@ -48,6 +49,85 @@ namespace FiasView.Operation.OperationWithDBF
         private string _insertText = string.Empty; // текст Insert операции
         private string _newText = string.Empty;
         private bool _result = false;
+        #region Параметры и реализация события, для передачи данных в ViewModel
+        private int _progBarValue;
+        private int _progBarMaxValue;
+        private string _progBarTextDB;
+        private string _progBarLoadCount;
+        private string _countRows;
+        /// <summary>
+        /// Значение Value у ProgressBar
+        /// </summary>
+        public int ProgBarValue
+        {
+            get { return _progBarValue; }
+            set
+            {
+                _progBarValue = value;
+                OnParametrChange("ProgBarValue");
+            }
+        }
+        /// <summary>
+        /// Максимальное значение ProgressBar {MaxValue}
+        /// </summary>
+        public int ProgBarMaxValue
+        {
+            get { return _progBarMaxValue; }
+            set
+            {
+                _progBarMaxValue = value;
+                OnParametrChange("ProgBarMaxValue");
+            }
+        }
+        /// <summary>
+        /// TextBox текст на ProgressBar
+        /// </summary>
+        public string ProgBarTextDB
+        {
+            get { return _progBarTextDB; }
+            set
+            {
+                _progBarTextDB = value;
+                OnParametrChange("ProgBarTextDB");
+            }
+        }
+        /// <summary>
+        /// Label, отображает значение в стиле: Загружено 0/1000;
+        /// </summary>
+        public string ProgBarLoadCount
+        {
+            get { return _progBarLoadCount; }
+            set
+            {
+                _progBarLoadCount = value;
+                OnParametrChange("ProgBarLoadCount");
+            }
+        }
+        /// <summary>
+        /// Отображает количество строк, которым было присвоен FIAS CODE
+        /// </summary>
+        public string CountRows
+        {
+            get { return _countRows; }
+            set
+            {
+                _countRows = value;
+                OnParametrChange("CountRows");
+            }
+        }
+        /// <summary>
+        /// Событие для передачи информации по изменению переменной. Способ подписывания на событие: Model.ParametrChange += OnPropertyChanged;
+        /// </summary>
+        public event Action<string> ParametrChange;
+        /// <summary>
+        /// Вызываемый метод для события
+        /// </summary>
+        /// <param name="prop">имя перменной</param>
+        private void OnParametrChange(string param = "")
+        {
+            ParametrChange?.Invoke(param);
+        }
+        #endregion
 
         /// <summary>
         /// Открыть файлы для загрузки таблиц
@@ -117,20 +197,13 @@ namespace FiasView.Operation.OperationWithDBF
             _dt = new DataTable();
             _mySql = new MySqlConnection(connString);
             _mySql.Open();
-            mv = new ViewModel()
-            {
-                ProgBarTextDB = "Подготовка данных",
-            };
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress.DataContext = mv; _progress._progbar.IsIndeterminate = true; }));
+            ProgBarTextDB = "Подготовка ADDROB30";
+            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress._progbar.IsIndeterminate = true; }));
             _adapter = new OdbcDataAdapter(_select + _tableName, _odbc);
             _dt.TableName = _tableName;
             _adapter.Fill(_dt);
             var bulk = new BulkOperation(_mySql);
-            mv = new ViewModel()
-            {
-                ProgBarTextDB = "Загружаю ADDROB30. Операция может занять до 20 минут!",
-            };
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress.DataContext = mv; }));
+            ProgBarTextDB = "Загружаю ADDROB30";
             bulk.BulkInsert(_dt);
             _mySql.Close();
             #region Old 
@@ -210,11 +283,8 @@ namespace FiasView.Operation.OperationWithDBF
             _command = new OdbcCommand(_select + _tableName, _odbc); // Отпавляем команду
             _reader = _command.ExecuteReader(); // Считываем ответ
             _house30 = new List<house30>();
-            mv = new ViewModel()
-                {
-                    ProgBarTextDB = "Подготовка HOUSE30!",
-                };
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress.DataContext = mv; _progress._progbar.IsIndeterminate = true; }));
+            ProgBarTextDB = "Подготавливаю HOUSE30";
+            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => {_progress._progbar.IsIndeterminate = true; }));
             _dt = new DataTable();
             _mySql = new MySqlConnection(connString);
             _mySql.Open();
@@ -222,11 +292,7 @@ namespace FiasView.Operation.OperationWithDBF
             _dt.TableName = _tableName;
             _adapter.Fill(_dt);
             var bulk = new BulkOperation(_mySql);
-            mv = new ViewModel()
-            {
-                ProgBarTextDB = "Загружаю HOUSE30. Ожидайте, операция может занять до 20 минут!",
-            };
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress.DataContext = mv; }));
+            ProgBarTextDB = "Загружаю HOUSE30";
             bulk.BulkInsert(_dt);
             _mySql.Close();
             #region old Extension EF6
@@ -285,18 +351,10 @@ namespace FiasView.Operation.OperationWithDBF
             _mySql.Open();
             _adapter = new OdbcDataAdapter(_select + _tableName, _odbc);
             _dt.TableName = _tableName;
-            mv = new ViewModel()
-            {
-                ProgBarTextDB = "Подготовка ROOM30",
-            };
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress.DataContext = mv; }));
+            ProgBarTextDB = "Подготовка ROOM30";
             _adapter.Fill(_dt);
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress.DataContext = mv; _progress._progbar.IsIndeterminate = true; }));
-            mv = new ViewModel()
-            {
-                ProgBarTextDB = "Загружаю ROOM30",
-            };
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress.DataContext = mv; }));
+            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress._progbar.IsIndeterminate = true; }));
+            ProgBarTextDB = "Загружаю ROOM30";
             var bulk = new BulkOperation(_mySql);
             bulk.BulkInsert(_dt);
             _mySql.Close();

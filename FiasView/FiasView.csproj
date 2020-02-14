@@ -124,14 +124,18 @@
     <Compile Include="MVVM\DelegateCommand\DelegateCommand.cs" />
     <Compile Include="MVVM\ManagerForms.cs" />
     <Compile Include="MVVM\ViewModel.cs" />
+    <Compile Include="MVVM\ViewModelProgressBar.cs" />
     <Compile Include="Operation\LoadAllTable.cs" />
     <Compile Include="Operation\OperationWithDBF\DBFtoSQL.cs" />
     <Compile Include="Operation\OperationWithDBF\Operation.cs" />
-    <Compile Include="Operation\WorkWithExcel\LoadExcelToGrid.cs" />
-    <Compile Include="Operation\WorkWithExcel\SelectFile.cs" />
+    <Compile Include="Operation\WorkWithAddress\WorkWithAllAddress.cs" />
+    <Compile Include="Operation\WorkWithAddress\SelectFile.cs" />
     <Compile Include="room30.cs" />
     <Compile Include="StartUp.xaml.cs">
       <DependentUpon>StartUp.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\InputForm.xaml.cs">
+      <DependentUpon>InputForm.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\progressBar.xaml.cs">
       <DependentUpon>progressBar.xaml</DependentUpon>
@@ -164,6 +168,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="StartUp.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\InputForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

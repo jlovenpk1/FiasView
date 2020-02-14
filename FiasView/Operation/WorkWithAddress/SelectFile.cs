@@ -20,17 +20,12 @@ namespace FiasView.Operation.WorkWithExcel
         private const string _checkStreet = "Проверьте адрес!";
         private const string _FiasColumn = "Фиас индетификатор";
         private const string _checkFiasColumn = "Фиас Код не обнаружен!";
-        public bool _DGWithFiasCode = false;
-        private Dictionary<int, house30> _cacheAdrr;
-        LoadExcelToGrid _excelWork;
+        WorkWithAllAddress _excelWork;
         OpenFileDialog _fileOpen;
         XLWorkbook _workbook;
         DataTable _data;
         SelectColumns _selectColumn;
-        Model1 db;
-        DBFtoSQL dts;
         progressBar _progress;
-        ViewModel vm;
         DataTable _oldData;
         string _path;
         public string _firstColumn = "";
@@ -49,7 +44,7 @@ namespace FiasView.Operation.WorkWithExcel
                 //any settings
             };
             if (_fileOpen.ShowDialog() == true) { _path = _fileOpen.FileName; }
-            _excelWork = new LoadExcelToGrid();
+            _excelWork = new WorkWithAllAddress();
 
             _selectColumn = new SelectColumns();
             _progress = new progressBar();
@@ -59,7 +54,7 @@ namespace FiasView.Operation.WorkWithExcel
             if (_firstColumn != "")
             {
                 _fileOpen.Reset();
-                _excelWork = new LoadExcelToGrid();
+                _excelWork = new WorkWithAllAddress();
                 _data.Clear();
                 await Task.Run(new Action(() =>
                 {

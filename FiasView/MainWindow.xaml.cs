@@ -51,16 +51,7 @@ namespace FiasView
 
         public MainWindow()
         {
-            InitializeComponent();
-            
-        }
-
-
-        private void ChangeColor(object sender, MouseEventArgs e)
-        {
-            Canvas _canvas = sender as Canvas;
-            _canvas.Background =  (SolidColorBrush) new BrushConverter().ConvertFrom("#FF385D89");
-           
+            InitializeComponent();  
         }
 
         private void ResetColor(object sender, MouseEventArgs e)
@@ -76,29 +67,6 @@ namespace FiasView
             // Begin dragging the window
             this.DragMove();
         }
-
-        private void Label_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            this.WindowState = WindowState.Maximized;
-            
-        }
-        public DataTable MyTable { get; set; }
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            this.MyTable = new DataTable();
-            this.MyTable.Columns.Add("Test");
-            var row1 = this.MyTable.NewRow();
-            row1["Test"] = "dsjfks";
-            //ViewModel vm = new ViewModel();
-            //vm.changeLabel();
-            this.MyTable.Rows.Add(row1);
-            this.DataContext = this;
-        }
-
-        //private void DictAutoswitch_Click(object sender, RoutedEventArgs e)
-        //{
-
-        //}
 
         //private void CheckUpdate_Click(object sender, RoutedEventArgs e)
         //{
@@ -127,32 +95,6 @@ namespace FiasView
         //            }
         //        }
         //}
-
-        //async void _start_Click(object sender, RoutedEventArgs e)
-        //{
-
-        //    _data.Dispose();
-        //    _data = new DataTable();
-        //    this.Hide();
-        //    await Task.Run(new Action(() =>
-        //    {
-        //        _progress.Dispatcher.BeginInvoke(new Action(delegate
-        //        {
-        //            _progress.Show();
-        //            _progress._progbar.IsIndeterminate = false;
-        //        }));
-        //        _data = _excelWork.GetFiasCode(vm);
-        //    }));
-        //    this.Show();
-        //    _progress.Hide();
-        //    _DGWithFiasCode = true;
-        //    _oldData = _data;
-        //    var wb = new XLWorkbook();
-        //    wb.Worksheets.Add(_data);
-        //    string _name = "Результат проверки.xlsx";
-        //    wb.SaveAs(_name);
-        //    _dataGrid.ItemsSource = _data.DefaultView;
-        //    _dataGrid.Items.Refresh();
     }
 
 }
