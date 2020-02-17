@@ -14,6 +14,8 @@ using Microsoft.Win32.SafeHandles;
 using System.Threading;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using FiasView.Operation.WorkWithExcel;
+using System.Windows.Documents;
 
 namespace FiasView.Operation.WorkWithExcel
 {
@@ -210,8 +212,9 @@ namespace FiasView.Operation.WorkWithExcel
         /// Парсинг адреса на: Адрес, Улица, Дом. Шаблон: город Астрахань, улица Джедая, дом 46(все А,Б,С и прочие корпусы, пишутся вот так: 46а)
         /// </summary>
         /// <param name="adress">Адрес шаблон: город Астрахань, улица Джедая, дом 46а</param>
-        private void ParsingAdress(string adress)
+        public void ParsingAdress(string adress)
         {
+
             adress = adress.Replace("№", "");
             List<string> _pAdress = adress.Split(new char[] { ',', }).ToList();
             string error = string.Empty;
@@ -220,7 +223,7 @@ namespace FiasView.Operation.WorkWithExcel
                 "город. ", "г. ", "город ", "г ",
                 " город.", " г.", " город", " г" };
             List<string> street = new List<string>() {
-                " улица", " ул", " ул.", " улица.", " у.", " пер", " пер.", " переулок", " проспект"," пр-кт"," проспект."," п-к"," площадь"," пл"," пл."," проезд"," п-д",
+                " улица", " ул.", " ул", " улица.", " у.", " пер", " пер.", " переулок", " проспект"," пр-кт"," проспект."," п-к"," площадь"," пл"," пл."," проезд"," п-д",
                 "улица ", "ул ", "у ", "ул. ", "улица. ", " у. ", "пер ", "пер. ", "переулок ","проспект ","пр-кт ","проспект. ","п-к ","площадь ","пл ","пл. ","проезд ","п-д ",
                 "улица", "ул", "у", " ул. ", "улица.", "у.", "пер", "переулок", "пер.","проспект","пр-кт","проспект.","п-к","площадь","пл","пл.","проезд","п-д","снт."," снт","снт. ", "снт ","снт, "," снт,"};
             List<string> house = new List<string>() {
@@ -247,12 +250,14 @@ namespace FiasView.Operation.WorkWithExcel
                             _city = _pAdress[i].Replace(city[x], "");
                             var posStart = _city.IndexOf(" ");
                             var posLast = _city.LastIndexOf(" ");
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                         else if (_pAdress[i].EndsWith(city[x]))
                         {
                             //test += _pAdress[i].Replace(city[x], "");
                             _city = _pAdress[i].Replace(city[x], "");
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                     }
@@ -275,6 +280,7 @@ namespace FiasView.Operation.WorkWithExcel
                                 _street = _street.IndexOf("пер") > 0 ? _street.Remove(_street.IndexOf("пер"), _street.Length - _street.IndexOf("пер")) : _street;
                                 _street = _street.IndexOf("пер.") > 0 ? _street.Remove(_street.IndexOf("пер."), _street.Length - _street.IndexOf("пер.")) : _street;
                             }
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                         else if (_pAdress[i].EndsWith(street[x]) || _pAdress[i].IndexOf("/") > 9)
@@ -293,6 +299,7 @@ namespace FiasView.Operation.WorkWithExcel
                                 _street = _street.IndexOf("пер") > 0 ? _street.Remove(_street.IndexOf("пер"), _street.Length - _street.IndexOf("пер")) : _street;
                                 _street = _street.IndexOf("пер.") > 0 ? _street.Remove(_street.IndexOf("пер."), _street.Length - _street.IndexOf("пер.")) : _street;
                             }
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                     }
@@ -308,6 +315,7 @@ namespace FiasView.Operation.WorkWithExcel
                             _house = posStart < 0 ? _house : _house.Remove(posStart, 1);
                             var posLast = _house.LastIndexOf(" ");
                             _house = posLast < 0 ? _house.ToLower() : _house.Remove(posLast, 1).ToLower();
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                         else if (_pAdress[i].StartsWith(house[x]))
@@ -324,6 +332,7 @@ namespace FiasView.Operation.WorkWithExcel
                             _house = posStart < 0 ? _house.ToLower() : _house.Remove(posStart, 1).ToLower();
                             var posLast = _house.LastIndexOf(" ");
                             _house = posLast < 0 ? _house.ToLower() : _house.Remove(posLast, 1).ToLower();
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                     }
@@ -340,6 +349,7 @@ namespace FiasView.Operation.WorkWithExcel
                             _corpus = posStart < 0 ? _corpus : _corpus.Remove(posStart, 1);
                             var posLast = _corpus.LastIndexOf(" ");
                             _corpus = posLast < 0 ? _corpus : _corpus.Remove(posLast, 1);
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                         else if (_pAdress[i].StartsWith(corpus[x]))
@@ -356,6 +366,7 @@ namespace FiasView.Operation.WorkWithExcel
                             _corpus = posStart < 0 ? _corpus : _corpus.Remove(posStart, 1);
                             var posLast = _corpus.LastIndexOf(" ");
                             _corpus = posLast < 0 ? _corpus : _corpus.Remove(posLast, 1);
+                            i = i >= _pAdress.Count ? i : i++;
                             break;
                         }
                     }
@@ -377,9 +388,9 @@ namespace FiasView.Operation.WorkWithExcel
             List<string> _progInfo = new List<string>();
             _data = _dataViewModel;
             DeleteEmptyRow();
+            int x = 0;
             for (int i = 0; i < _data.Rows.Count; i++)
             {
-                int x = 0;
                 _street = _data.Rows[i][Columns._street].ToString();
                 _house = _data.Rows[i][Columns._house].ToString();
                 _corpus = _data.Rows[i][Columns._corpus].ToString();
@@ -426,7 +437,7 @@ namespace FiasView.Operation.WorkWithExcel
         {
             for (int i = 0; i < _data.Rows.Count; i++)
             {
-                if (_data.Rows[i][Columns._street] == _editAdress || _data.Rows[i][Columns._street] == string.Empty || _data.Rows[i][Columns._house] == string.Empty)
+                if ((string)_data.Rows[i][Columns._street] == _editAdress || (string)_data.Rows[i][Columns._street] == string.Empty || (string)_data.Rows[i][Columns._house] == string.Empty)
                 {
                     _data.Rows[i].Delete();
                 }
@@ -747,4 +758,5 @@ namespace FiasView.Operation.WorkWithExcel
 
     }
 }
+
 

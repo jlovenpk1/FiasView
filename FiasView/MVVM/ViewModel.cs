@@ -146,6 +146,10 @@ namespace FiasView.MVVM
         /// </summary>
         private bool _DGWithFiasCode = false;
         /// <summary>
+        /// ViewModel - вывод фиас кода, InputForm форма, TextBox компонент
+        /// </summary>
+        private string _informtext;
+        /// <summary>
         /// ViewModel - переменная для ProgressBar - Value
         /// </summary>
         private int _progBarValue;
@@ -166,6 +170,42 @@ namespace FiasView.MVVM
         /// ViewModel - переменная для MainWindow. Выводится количество поподаний по ФИАСу
         /// </summary>
         private string _countRows;
+        /// <summary>
+        /// ViewModel - для кнопки поиска форма InputForm
+        /// </summary>
+        private Visibility _vButton;
+        /// <summary>
+        /// ViewModel - для TextBox, форма InputForm
+        /// </summary>
+        private Visibility _vTextBox;
+        /// <summary>
+        /// ViewModel - для кнопки поиска форма InputForm
+        /// </summary>
+        public Visibility VButton
+        {
+            get { return _vButton; }
+            set { _vButton = value;
+                OnPropertyChanged("VButton"); }
+        }
+        /// <summary>
+        /// ViewModel - для TextBox, форма InputForm
+        /// </summary>
+        public Visibility VTextBox
+        {
+            get { return _vTextBox; }
+            set { _vTextBox = value;
+                OnPropertyChanged("VTextBox"); }
+        }
+        /// <summary>
+        /// ViewModel - вывод фиас кода, InputForm форма, TextBox компонент
+        /// </summary>
+        public string InFormText
+        {
+            get { return _informtext; }
+            set { _informtext = value;
+                OnPropertyChanged("InFormText");
+            }
+        }
         /// <summary>
         /// Значение Value у ProgressBar
         /// </summary>
@@ -315,33 +355,50 @@ namespace FiasView.MVVM
         {
             string _address = string.Empty;
             string _result = string.Empty;
+            bool _close = false;
             _inputform = new InputForm();
-            _inputform._start.Click += (s, e) => { _inputform.Close(); };
-            _inputform.Closed += (s, e) => { _address = _inputform._Address.Text; };
+            _inputform._start.Click += (s, e) => { _address = InFormText;  _inputform.Hide(); };
+            _inputform.Closed += (s, e) => { _close = true; };
             _inputform.ShowDialog();
-            await Task.Run(new Action(() =>
+            if (!_close)
             {
-                _progress.Dispatcher.BeginInvoke(new Action(delegate
+                await Task.Run(new Action(() =>
                 {
-                    _progress.Show();
-                    _progress._progbar.IsIndeterminate = false;
+                    _progress.Dispatcher.BeginInvoke(new Action(delegate
+                    {
+                        _progress.Show();
+                        _progress._progbar.IsIndeterminate = false;
+                    }));
+                    _workWithAdress.ParametrChange += OnModelPropertyChanged; // если в классе LoadExcelToGrid сработает событие ParametrChange выполняем OnModelPropertyCanged
+                    ProgBarLoadCount = "";
+                    ProgBarMaxValue = 0;
+                    ProgBarTextDB = "";
+                    ProgBarValue = 0;
+                    if (_workWithAdress._addr != null && _workWithAdress._house30 != null)
+                    {
+                        _result = _workWithAdress.GetFiasCode(_address);
+                        _progress.Dispatcher.BeginInvoke(new Action(delegate
+                        {
+                            _progress.Close();
+                        }));
+                        VButton = Visibility.Hidden;
+                        InFormText = "ФИАС КОД: " + _result;
+                    }
+                    else
+                    {
+                        _workWithAdress.LoadCacheAdrr(); // грузим кэш улиц
+                        _workWithAdress.LoadCacheHouse(); // грузим Кэш Домов
+                        _result = _workWithAdress.GetFiasCode(_address);
+                        _progress.Dispatcher.BeginInvoke(new Action(delegate
+                        {
+                            _progress.Close();
+                        }));
+                        VButton = Visibility.Hidden;
+                        InFormText = "ФИАС КОД: " + _result;
+                    }
                 }));
-                _workWithAdress.ParametrChange += OnModelPropertyChanged; // если в классе LoadExcelToGrid сработает событие ParametrChange выполняем OnModelPropertyCanged
-                ProgBarLoadCount = "";
-                ProgBarMaxValue = 0;
-                ProgBarTextDB = "";
-                ProgBarValue = 0;
-                if (_workWithAdress._addr != null && _workWithAdress._house30 != null)
-                {
-                    _result = _workWithAdress.GetFiasCode(_address);
-                }
-                else
-                {
-                    _workWithAdress.LoadCacheAdrr(); // грузим кэш улиц
-                    _workWithAdress.LoadCacheHouse(); // грузим Кэш Домов
-                    _result = _workWithAdress.GetFiasCode(_address);
-                }
-            }));
+                _inputform.ShowDialog();
+            }
         }
         
         /// <summary>
@@ -399,9 +456,9 @@ namespace FiasView.MVVM
         /// <param name="x">Windows type object</param>
         private void CloseButton(object x)
         {
-            var mv = x as MainWindow;
+            var mv = x as Window;
             mv.Close();
-            Dispatcher.CurrentDispatcher.BeginInvokeShutdown(DispatcherPriority.Normal);
+            if (mv.Name == "MainWin") { Dispatcher.CurrentDispatcher.BeginInvokeShutdown(DispatcherPriority.Normal); } 
         }
 
         /// <summary>
@@ -436,7 +493,7 @@ namespace FiasView.MVVM
                 }
             }));
             _window.Show();
-            _progress.Close();
+            _progress.Hide();
             _DGWithFiasCode = true;
             MainGrid = _resultFileLoad;
             _grid.Items.Refresh();

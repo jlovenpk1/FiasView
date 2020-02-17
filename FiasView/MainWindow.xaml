@@ -87,7 +87,7 @@
             </i:Interaction.Triggers>
         </Canvas>
         <Canvas Grid.ColumnSpan="11" Background="#FF385E8B" MouseDown="Drag_Windows">
-            <Label Content="{Binding CountRows}" FontSize="20" Foreground="White" Background="{x:Null}" Height="35" Canvas.Left="10" Width="94" Canvas.Top="2"/>
+            <Label Content="{Binding CountRows}" FontSize="20" Foreground="White" Background="{x:Null}" Height="35" Canvas.Left="10" Width="286" Canvas.Top="2"/>
         </Canvas>
         <Label Content="_" FontSize="20" Foreground="White" Background="{x:Null}" Grid.Column="8" RenderTransformOrigin="0.47,0.197">
             <i:Interaction.Triggers>

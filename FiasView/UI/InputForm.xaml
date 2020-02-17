@@ -4,13 +4,24 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FiasView.UI"
+        xmlns:i ="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
+        Name="_InputForm"
         DataContext="{StaticResource ViewModel}"
-        Title="InputForm" Height="70.839" Width="430.643" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" AllowsTransparency="True" Background="#00000000" Foreground="#00000000">
+        Title="Форма ввода адреса"  Height="82.839" Width="451.643" WindowState="Normal" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" AllowsTransparency="True" Background="#00000000" Foreground="#00000000">
     <Grid>
-        <TextBox Name="_Address" Height="23" Margin="16,31,62,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
-        <TextBlock Margin="15,10,14,0" TextWrapping="Wrap" Text="Строгий шаблон: г. Астрахань, ул. Вильямса Грейси, д. 56а, корп. 5" VerticalAlignment="Top" Background="White" Foreground="Black" FontSize="13"/>
-        <Button Name="_start" Content="🔎" Margin="369,31,14,0" VerticalAlignment="Top" Height="23"/>
+        <TextBox Name="_Address" Height="23" Margin="13,50,65,0" TextWrapping="Wrap"  VerticalAlignment="Top" Text="{Binding InFormText}" Visibility="{Binding VTextBox}"/>
+        <TextBlock Margin="12,29,17,0" TextWrapping="Wrap" Text="Строгий шаблон: г. Астрахань, ул. Вильямса Грейси, д. 56а, корп. 5" VerticalAlignment="Top" Background="White" Foreground="Black" FontSize="13"/>
+        <Button Name="_start" Content="🔎" Margin="366,50,17,0" VerticalAlignment="Top" Height="23" Visibility="{Binding VButton}"/>
+        <Button Content="X" HorizontalAlignment="Left" Margin="417,0,0,0" VerticalAlignment="Top" Width="25" Height="24">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <i:InvokeCommandAction Command="{Binding _CloseButton}" CommandParameter="{Binding ElementName=_InputForm}">
+                    </i:InvokeCommandAction>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
+        
 
     </Grid>
 </Window>
