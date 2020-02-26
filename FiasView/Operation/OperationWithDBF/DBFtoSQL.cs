@@ -19,7 +19,7 @@ namespace FiasView.Operation.OperationWithDBF
     /// <summary>
     /// DBFtoSQL: Класс отвечает за работу с DBF, что бы перевести базы DBF в MySQL
     /// </summary>
-    class DBFtoSQL
+    class DBFtoSQL : IDisposable
     {
         private OdbcConnection _odbc; // ODBC коннект, сюда мы кинем наш путь подключения
         private OpenFileDialog openFile; // Работа с проводником для открытия файла
@@ -395,6 +395,11 @@ namespace FiasView.Operation.OperationWithDBF
             //_room30.Clear();
             #endregion
             _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress._progbar.IsIndeterminate = false;  _progress.Close(); }));
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
  }
