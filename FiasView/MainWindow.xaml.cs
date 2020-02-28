@@ -30,25 +30,6 @@ namespace FiasView
     /// </summary>
     public partial class MainWindow : Window
     {
-        //private const string _street = "Улица";
-        //private const string _checkStreet = "Проверьте адрес!";
-        //private const string _FiasColumn = "Фиас индетификатор";
-        //private const string _checkFiasColumn = "Фиас Код не обнаружен!";
-        //public bool _DGWithFiasCode = false;
-        //private Dictionary<int,house30> _cacheAdrr;
-        //LoadExcelToGrid _excelWork;
-        //OpenFileDialog _fileOpen;
-        //XLWorkbook _workbook;
-        //DataTable _data;
-        //Model1 db;
-        //DBFtoSQL dts;
-        //progressBar _progress;
-        //ViewModel vm;
-        //DataTable _oldData;
-        //string _path;
-        //public string _firstColumn = "";
-        //public string _secondColumn = "";
-
         public MainWindow()
         {
             InitializeComponent();  
@@ -67,34 +48,6 @@ namespace FiasView
             // Begin dragging the window
             this.DragMove();
         }
-
-        //private void CheckUpdate_Click(object sender, RoutedEventArgs e)
-        //{
-        //    db = new Model1();
-
-        //        if (db.Database.Exists() == false)
-        //        {
-        //            if(MessageBox.Show("База отсутствует, создать новую?", "База данных не обнаруженна",MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-        //            {
-        //                MessageBox.Show("Создано");
-        //                db.Database.Create();
-        //                dts = new DBFtoSQL();
-        //                dts.GetSQLData();
-        //            } 
-        //        }
-
-        //        if (db.Database.Exists() == true)
-        //        {
-        //            if(MessageBox.Show("База данных существует, обновить?","База данных обнаруженна",MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-        //            {
-        //                MessageBox.Show("Обновляемся");
-        //                dts = new DBFtoSQL();
-        //            db.Database.Delete();
-        //            db.Database.Create();
-        //            dts.GetSQLData();
-        //            }
-        //        }
-        //}
     }
 
 }

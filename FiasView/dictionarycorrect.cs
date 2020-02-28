@@ -6,7 +6,7 @@ namespace FiasView
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    [Table("fias.dictionarycorrect")]
+    [Table("dictionarycorrect")]
     public partial class dictionarycorrect
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -15,15 +15,15 @@ namespace FiasView
         public DateTime date { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(128)]
         public string Name { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(128)]
         public string userName { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(128)]
         public string IDCorrect { get; set; }
     }
 }

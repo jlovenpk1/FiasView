@@ -17,6 +17,8 @@ using System.Windows.Media;
 using FiasView.UI;
 using ClosedXML.Excel;
 using System.Windows.Threading;
+using FiasView.Operation.WorkWithBase;
+using FiasView.Operation.OperationWithDBF;
 
 namespace FiasView.MVVM
 {
@@ -105,6 +107,18 @@ namespace FiasView.MVVM
         public DelegateCommand.DelegateCommand _HideWindow
         {
             get { return new DelegateCommand.DelegateCommand(x => { HideWindow(); }); }
+        }
+        /// <summary>
+        /// Command View - Свернуть окно
+        /// </summary>
+        public DelegateCommand.DelegateCommand _StartUpdate
+        {
+            get { return new DelegateCommand.DelegateCommand(x => { StartUpdate(); }); }
+        }
+
+        private void StartUpdate()
+        {
+            new UpdateBase(new DBFtoSQL()).Update();
         }
         #endregion
         #region Все переменные и экземпляры классов

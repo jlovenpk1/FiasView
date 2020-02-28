@@ -4,7 +4,6 @@ namespace FiasView
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
     [Table("fias.addrcorrect")]
     public partial class addrcorrect
@@ -13,11 +12,11 @@ namespace FiasView
         public int ID { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(128)]
         public string shortName { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(128)]
         public string fullName { get; set; }
 
         [StringLength(45)]

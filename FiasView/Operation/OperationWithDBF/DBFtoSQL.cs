@@ -19,7 +19,7 @@ namespace FiasView.Operation.OperationWithDBF
     /// <summary>
     /// DBFtoSQL: Класс отвечает за работу с DBF, что бы перевести базы DBF в MySQL
     /// </summary>
-    class DBFtoSQL : IDisposable
+    class DBFtoSQL : IDisposable, IDBFtoSQL
     {
         private OdbcConnection _odbc; // ODBC коннект, сюда мы кинем наш путь подключения
         private OpenFileDialog openFile; // Работа с проводником для открытия файла
@@ -37,7 +37,7 @@ namespace FiasView.Operation.OperationWithDBF
         private string _select = "SELECT * from "; // Запрос SQL
         private string _connectLineS = @"Driver={Microsoft dBase Driver (*.dbf)}; SourceType=DBF;DefaultDir="; // старт строки подключения
         private string _connectLineE = @";Exclusive=No; Collate=Machine;NULL=NO;DELETED=NO; BACKGROUNDFETCH=NO"; // конец строки подключения
-        private  string[] _dbfName = new string[3] { "ADDROB30.DBF", "HOUSE30.DBF", "ROOM30.DBF" }; // Имена баз, для проверки и подключения
+        private string[] _dbfName = new string[3] { "ADDROB30.DBF", "HOUSE30.DBF", "ROOM30.DBF" }; // Имена баз, для проверки и подключения
         private string connString = "Server= localhost;Database=fias;port=3306 ;User Id= root ;password=password ;";
         private string dbfDirectory; // папка где хранится DBF файл
         private string[] dbfName; // Имя файла
@@ -146,7 +146,7 @@ namespace FiasView.Operation.OperationWithDBF
                     dbfName = openFile.SafeFileNames.ToArray(); // загоняем имя файла в переменную 
                 }
                 else { MessageBox.Show("Были выбранны не правильные файлы: " + openFile.FileNames[0] + " " + openFile.FileNames[1] + " " + openFile.FileNames[2]); }
-                
+
             }
             else { MessageBox.Show("Выбире 3-и файла ADDROB30.DBF, HOUSE30.DBF, ROOM30.DBF или обратитесь к разработчику в АСУП"); }
             openFile.Reset(); // обнуляемся
@@ -162,16 +162,16 @@ namespace FiasView.Operation.OperationWithDBF
 
             if (OpenFiles())
             {
-                _odbc = new OdbcConnection(_connectLineS + dbfDirectory + _connectLineE ); // Подключение к DBF
+                _odbc = new OdbcConnection(_connectLineS + dbfDirectory + _connectLineE); // Подключение к DBF
                 for (int i = 0; i < dbfName.Length; i++)
                 {
                     _odbc.Close(); // закрывает подключение перед открытием нового подключения, иначе кутак пасс
                     try
                     {
-                        if (dbfName[i] == _dbfName[0] ) { await Task.Run(new Action(() => { LoadToAddrob30(dbfName[i]); })); }
+                        if (dbfName[i] == _dbfName[0]) { await Task.Run(new Action(() => { LoadToAddrob30(dbfName[i]); })); }
                         if (dbfName[i] == _dbfName[1]) { await Task.Run(new Action(() => { LoadToHouse30(dbfName[i]); })); }
-                        if (dbfName[i] ==  _dbfName[2]) { await Task.Run(new Action(() => { LoadToRoom30(dbfName[i]); })); }
-                        
+                        if (dbfName[i] == _dbfName[2]) { await Task.Run(new Action(() => { LoadToRoom30(dbfName[i]); })); }
+
                     }
                     catch (Exception er) // Мало ли
                     {
@@ -187,9 +187,9 @@ namespace FiasView.Operation.OperationWithDBF
         /// </summary>
         /// <param name="_tableName">Имя таблицы из которой читаем</param>
         private void LoadToAddrob30(string _tableName)
-         {
-            
-            _progress.Dispatcher.BeginInvoke(new Action(() =>{ _progress.Show(); })); // вызываем прогрес бар
+        {
+
+            _progress.Dispatcher.BeginInvoke(new Action(() => { _progress.Show(); })); // вызываем прогрес бар
             _odbc = new OdbcConnection(_connectLineS + dbfDirectory + _connectLineE); // подключение к базе данных DBF
             _tableName = _tableName.Remove(_tableName.IndexOf('.')); // получаем имя таблицы
             _str = new StringBuilder(); // Экземпляр StringBuilder 
@@ -275,7 +275,7 @@ namespace FiasView.Operation.OperationWithDBF
         /// </summary>
         /// <param name="_tableName">Имя таблицы из которой читаем</param>
         private void LoadToHouse30(string _tableName)
-        {      
+        {
             _odbc = new OdbcConnection(_connectLineS + dbfDirectory + _connectLineE);
             _tableName = _tableName.Remove(_tableName.IndexOf('.'));
             _str = new StringBuilder(); // Экземпляр StringBuilder 
@@ -284,7 +284,7 @@ namespace FiasView.Operation.OperationWithDBF
             _reader = _command.ExecuteReader(); // Считываем ответ
             _house30 = new List<house30>();
             ProgBarTextDB = "Подготавливаю HOUSE30";
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => {_progress._progbar.IsIndeterminate = true; }));
+            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress._progbar.IsIndeterminate = true; }));
             _dt = new DataTable();
             _mySql = new MySqlConnection(connString);
             _mySql.Open();
@@ -394,7 +394,7 @@ namespace FiasView.Operation.OperationWithDBF
             //db.Dispose();
             //_room30.Clear();
             #endregion
-            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress._progbar.IsIndeterminate = false;  _progress.Close(); }));
+            _progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { _progress._progbar.IsIndeterminate = false; _progress.Close(); }));
         }
 
         public void Dispose()
@@ -402,5 +402,5 @@ namespace FiasView.Operation.OperationWithDBF
             throw new NotImplementedException();
         }
     }
- }
+}
 

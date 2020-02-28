@@ -1,23 +1,26 @@
+using MySqlX.XDevAPI;
+using System;
+using System.Data.Entity;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Data.Entity.Migrations.History;
+using MySql.Data.EntityFramework;
+
+
 namespace FiasView
 {
-    using System;
-    using System.Data.Entity;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
-
     public partial class Model1 : DbContext
     {
         public Model1()
             : base("name=fias")
         {
+          
         }
-
         public virtual DbSet<addrcorrect> addrcorrect { get; set; }
         public virtual DbSet<addrob30> addrob30 { get; set; }
         public virtual DbSet<dictionarycorrect> dictionarycorrect { get; set; }
         public virtual DbSet<house30> house30 { get; set; }
         public virtual DbSet<room30> room30 { get; set; }
-
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<addrcorrect>()
