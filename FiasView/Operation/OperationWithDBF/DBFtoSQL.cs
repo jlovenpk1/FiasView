@@ -38,7 +38,7 @@ namespace FiasView.Operation.OperationWithDBF
         private string _connectLineS = @"Driver={Microsoft dBase Driver (*.dbf)}; SourceType=DBF;DefaultDir="; // старт строки подключения
         private string _connectLineE = @";Exclusive=No; Collate=Machine;NULL=NO;DELETED=NO; BACKGROUNDFETCH=NO"; // конец строки подключения
         private string[] _dbfName = new string[3] { "ADDROB30.DBF", "HOUSE30.DBF", "ROOM30.DBF" }; // Имена баз, для проверки и подключения
-        private string connString = "Server= localhost;Database=fias;port=3306 ;User Id= root ;password=password ;";
+        private string connString = Properties.Settings.Default.connectionString;
         private string dbfDirectory; // папка где хранится DBF файл
         private string[] dbfName; // Имя файла
         private string _tableName = string.Empty; // Имя без .DBF
@@ -158,8 +158,16 @@ namespace FiasView.Operation.OperationWithDBF
         /// </summary>
         async public void GetSQLData()
         {
+            #region Быстрофикс с проблемой кириллицы в старых MySQL
             _progress = new progressBar();
-
+            _mySql = new MySqlConnection(connString);
+            MySqlCommand command = new MySqlCommand("ALTER TABLE addrob30 CONVERT TO CHARACTER SET utf8;" +
+                "ALTER TABLE house30 CONVERT TO CHARACTER SET utf8;"+
+                 "ALTER TABLE room30 CONVERT TO CHARACTER SET utf8;", _mySql);
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            _mySql.Dispose();
+            #endregion
             if (OpenFiles())
             {
                 _odbc = new OdbcConnection(_connectLineS + dbfDirectory + _connectLineE); // Подключение к DBF

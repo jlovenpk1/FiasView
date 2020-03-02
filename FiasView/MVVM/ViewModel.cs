@@ -116,10 +116,7 @@ namespace FiasView.MVVM
             get { return new DelegateCommand.DelegateCommand(x => { StartUpdate(); }); }
         }
 
-        private void StartUpdate()
-        {
-            new UpdateBase(new DBFtoSQL()).Update();
-        }
+        
         #endregion
         #region Все переменные и экземпляры классов
         /// <summary>
@@ -361,6 +358,15 @@ namespace FiasView.MVVM
         //    _mf._mv.Show();
         //}
         #endregion
+
+        /// <summary>
+        /// Обновить базу
+        /// </summary>
+        private void StartUpdate()
+        {
+
+            new UpdateBase(new DBFtoSQL()).Update();
+        }
 
         /// <summary>
         /// Command View - метод для поиска ФИАС кода по адресу 
